@@ -1,0 +1,10 @@
+{
+       "package": "gLPUi",
+       "title": "Basic UI for gLPU",
+       "description": "Basic UI for gLPU",
+       "version": "1.0.0",
+       "author": "gesslar",
+       "icon": "",
+       "dependencies": "",
+       "outputFile": true
+}
