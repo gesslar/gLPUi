@@ -206,7 +206,7 @@ GLPUI.CapLabel = GLPUI.CapLabel or Geyser.Label:new({
     name = "CapLabel",
     x = 0, y = 0,
     height = "100%", width = 60,
-    message = "C",
+    message = "Capacity",
     stylesheet = GLPUI.Styles.Label,
     fontSize = GLPUI.metrics.label_font_size,
     h_policy = Geyser.Fixed,
@@ -259,9 +259,9 @@ end
 function GLPUI:UpdateCapacity()
     local cap = tonumber(gmcp.Char.Status.capacity)
     local max = tonumber(gmcp.Char.Status.max_capacity)
-    local per = math.floor((cap / max) * 100)
+    local per = 100-math.floor((cap / max) * 100)
 
-    self.CapBar:setValue(cap, max, f"{per}%")
+    self.CapBar:setValue(max-cap, max, f"{per}%")
 end
 
 local handler
