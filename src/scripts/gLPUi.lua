@@ -190,9 +190,9 @@ GLPUI.XPBar.text:echo(nil, "nocolor", nil)
 GLPUI.Status = GLPUI.Status or {}
 GLPUI.Status.Advancement = GLPUI.Status.Advancement or {}
 
--- Capacity and Volume
-GLPUI.CapVolBox = GLPUI.CapVolBox or Geyser.HBox:new({
-    name = "CapVolBox",
+-- Capacity
+GLPUI.CapBox = GLPUI.CapBox or Geyser.HBox:new({
+    name = "CapBox",
 }, GLPUI.OtherBox)
 
 -- Capacity
@@ -200,7 +200,7 @@ GLPUI.CapContainer = GLPUI.CapContainer or Geyser.HBox:new({
     name = "CapContainer",
     x = 0, y = 0,
     height = "100%", width = "100%",
-}, GLPUI.CapVolBox);
+}, GLPUI.CapBox);
 
 GLPUI.CapLabel = GLPUI.CapLabel or Geyser.Label:new({
     name = "CapLabel",
@@ -225,36 +225,6 @@ GLPUI.CapBar:setStyleSheet(
 )
 GLPUI.CapBar.text:setFontSize(GLPUI.metrics.gauge_font_size)
 GLPUI.CapBar.text:echo(nil, "nocolor", nil)
-
--- Volume
-
-GLPUI.VolContainer = GLPUI.HBox or Geyser.HBox:new({
-    name = "VolContainer",
-}, GLPUI.CapVolBox);
-
-GLPUI.VolLabel = GLPUI.VolLabel or Geyser.Label:new({
-    name = "VolLabel",
-    x = 0, y = 0,
-    height = "100%", width = 25,
-    message = "V",
-    stylesheet = GLPUI.Styles.Label,
-    fontSize = GLPUI.metrics.label_font_size,
-    h_policy = Geyser.Fixed,
-}, GLPUI.VolContainer)
-GLPUI.VolLabel:echo(nil, "nocolor", nil)
-
-GLPUI.VolBar = Geyser.Gauge:new({
-    name="VolBar",
-    x = 60, y = "20%",
-    height = "75%",
-}, GLPUI.VolContainer)
-GLPUI.VolBar:setStyleSheet(
-    GLPUI.Styles.VolFront,
-    GLPUI.Styles.VolBack,
-    GLPUI.Styles.GaugeText
-)
-GLPUI.VolBar.text:setFontSize(GLPUI.metrics.gauge_font_size)
-GLPUI.VolBar.text:echo(nil, "nocolor", nil)
 
 function GLPUI:UpdateXP()
     if gmcp.Char.Status.xp == nil or gmcp.Char.Status.tnl == nil then return end
@@ -292,14 +262,6 @@ function GLPUI:UpdateCapacity()
     local per = math.floor((cap / max) * 100)
 
     self.CapBar:setValue(cap, max, f"{per}%")
-end
-
-function GLPUI:UpdateVolume()
-    local vol = tonumber(gmcp.Char.Status.volume)
-    local max = tonumber(gmcp.Char.Status.max_volume)
-    local per = math.floor((vol / max) * 100)
-
-    self.VolBar:setValue(vol, max, f"{per}%")
 end
 
 local handler
@@ -340,16 +302,6 @@ if registerNamedEventHandler(
     handler,
     "gmcp.Char.Status",
     "GLPUI:UpdateCapacity"
-) then
-    GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler
-end
-
-handler = GLPUI.appName .. ":UpdateVolume"
-if registerNamedEventHandler(
-    GLPUI.appName,
-    handler,
-    "gmcp.Char.Status",
-    "GLPUI:UpdateVolume"
 ) then
     GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler
 end

@@ -40,8 +40,6 @@ GLPUI.Styles = {
     XPBack    = f[[ background-color: rgba(50, 0, 50, 100%); {gauge} ]],
     CapFront  = f[[ background-color: rgba(191, 87, 0, 80%); {gauge} ]],
     CapBack   = f[[ background-color: rgba(115, 51, 0, 100%); {gauge} ]],
-    VolFront  = f[[ background-color: rgba(51, 102, 51, 80%); {gauge} ]],
-    VolBack   = f[[ background-color: rgba(24, 48, 24, 100%); {gauge} ]],
 }
 
 GLPUI.Vitals = GLPUI.Vitals or {
