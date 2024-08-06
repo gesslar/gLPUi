@@ -43,3 +43,33 @@ if registerNamedEventHandler(
 ) then
     GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler
 end
+
+function GLPUI:UpdateBar(bar, value, max, text)
+    -- We need at least these values to proceed
+    if not bar or not value or not max then
+        return
+    end
+
+    -- This is the percentage of the bar that is full
+    -- and also the percentage displayed if no text is
+    -- provided.
+    local per = (value / max) * 100.0
+    local bar_max = 100
+
+    local value = per
+    if per > 100 then
+        value = 100
+    elseif per < 5 then
+        if value <= 0 then
+            value = 0
+        else
+            value = 5
+        end
+    end
+
+    if not text then
+        text = string.format("%.1f%%", per)
+    end
+
+    bar:setValue(value, bar_max, text)
+end

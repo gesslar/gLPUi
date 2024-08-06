@@ -104,26 +104,26 @@ function GLPUI:UpdateVitals()
     if gmcp.Char.Vitals.max_mp ~= nil then GLPUI.Vitals.MP.max = tonumber(gmcp.Char.Vitals.max_mp) end
 
     if GLPUI.Vitals.HP.current ~= nil and GLPUI.Vitals.HP.max ~= nil then
-        GLPUI.HPBar:setValue(
-            GLPUI.Vitals.HP.current,
-            GLPUI.Vitals.HP.max,
-            f[[{string.format("%.1f", GLPUI.Vitals.HP.current)}]]
+        self:UpdateBar(
+            self.HPBar,
+            self.Vitals.HP.current,
+            self.Vitals.HP.max
         )
     end
 
     if GLPUI.Vitals.SP.current ~= nil and GLPUI.Vitals.SP.max ~= nil then
-        GLPUI.SPBar:setValue(
-            GLPUI.Vitals.SP.current,
-            GLPUI.Vitals.SP.max,
-            f[[{string.format("%.1f", GLPUI.Vitals.SP.current)}]]
+        self:UpdateBar(
+            self.SPBar,
+            self.Vitals.SP.current,
+            self.Vitals.SP.max
         )
     end
 
     if GLPUI.Vitals.MP.current ~= nil and GLPUI.Vitals.MP.max ~= nil then
-        GLPUI.MPBar:setValue(
-            GLPUI.Vitals.MP.current,
-            GLPUI.Vitals.MP.max,
-            f[[{string.format("%.1f", GLPUI.Vitals.MP.current)}]]
+        self:UpdateBar(
+            self.MPBar,
+            self.Vitals.MP.current,
+            self.Vitals.MP.max
         )
     end
 end
@@ -152,14 +152,14 @@ GLPUI.FoeLabel:echo(nil, "nocolor", nil)
 GLPUI.FoeBar = Geyser.Gauge:new({
     name="FoeBar",
 }, GLPUI.FoeContainer)
-  GLPUI.FoeBar:setStyleSheet(
+GLPUI.FoeBar:setStyleSheet(
     GLPUI.Styles.FoeFront,
     GLPUI.Styles.FoeBack,
     GLPUI.Styles.GaugeText
 )
 GLPUI.FoeBar.text:setFontSize(GLPUI.metrics.gauge_font_size)
 GLPUI.FoeBar.text:echo(nil, "nocolor", nil)
-GLPUI.FoeBar:setValue(0, 100, "None")
+GLPUI:UpdateBar(GLPUI.FoeBar, 0, 100, "None")
 
 -- XP
 GLPUI.XPContainer = GLPUI.XPContainer or Geyser.HBox:new({
@@ -239,7 +239,7 @@ function GLPUI:UpdateXP()
         per = per
     }
 
-    self.XPBar:setValue(xp, tnl, f"{per}%")
+    self:UpdateBar(self.XPBar, xp, tnl)
 end
 
 function GLPUI:UpdateFoe()
@@ -253,7 +253,7 @@ function GLPUI:UpdateFoe()
         enemy_health = tonumber(gmcp.Char.Status.current_enemy_health)
     end
 
-    self.FoeBar:setValue(enemy_health, 100, enemy)
+    self:UpdateBar(self.FoeBar, enemy_health, 100, enemy)
 end
 
 function GLPUI:UpdateCapacity()
@@ -261,7 +261,7 @@ function GLPUI:UpdateCapacity()
     local max = tonumber(gmcp.Char.Status.max_capacity)
     local per = 100-math.floor((cap / max) * 100)
 
-    self.CapBar:setValue(max-cap, max, f"{per}%")
+    self:UpdateBar(self.CapBar, cap, max)
 end
 
 local handler
