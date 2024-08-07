@@ -59,11 +59,11 @@ function GLPUI:UpdateBar(bar, value, max, text)
     local value = per
     if per > 100 then
         value = 100
-    elseif per < 5 then
+    elseif per < 6 then
         if value <= 0 then
             value = 0
         else
-            value = 5
+            value = 6
         end
     end
 

@@ -261,7 +261,7 @@ function GLPUI:UpdateCapacity()
     local max = tonumber(gmcp.Char.Status.max_capacity)
     local per = 100-math.floor((cap / max) * 100)
 
-    self:UpdateBar(self.CapBar, cap, max)
+    self:UpdateBar(self.CapBar, max-cap, max)
 end
 
 local handler
