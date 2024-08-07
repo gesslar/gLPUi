@@ -257,11 +257,10 @@ function GLPUI:UpdateFoe()
 end
 
 function GLPUI:UpdateCapacity()
+    local fill = tonumber(gmcp.Char.Status.fill)
     local cap = tonumber(gmcp.Char.Status.capacity)
-    local max = tonumber(gmcp.Char.Status.max_capacity)
-    local per = 100-math.floor((cap / max) * 100)
 
-    self:UpdateBar(self.CapBar, max-cap, max)
+    self:UpdateBar(self.CapBar, fill, cap) ;
 end
 
 local handler
