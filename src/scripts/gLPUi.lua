@@ -1,3 +1,5 @@
+local u = utf8.escape
+
 GLPUI.MainContainer = GLPUI.MainContainer or Geyser.Label:new({
     name = "MainContainer",
     x = 0, y = -(GLPUI.metrics.height),
@@ -79,7 +81,7 @@ GLPUI.MPLabel = GLPUI.MPLabel or Geyser.Label:new({
     width = 30,
     message = "MP",
     stylesheet = GLPUI.Styles.Label,
-    GLPUI.metrics.label_font_size,
+    fontSize = GLPUI.metrics.label_font_size,
     h_policy = Geyser.Fixed
 }, GLPUI.MPContainer)
 GLPUI.MPLabel:echo(nil, "nocolor", nil)
