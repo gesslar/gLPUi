@@ -98,14 +98,14 @@ GLPUI.MPBar.text:setFontSize(GLPUI.metrics.gauge_font_size)
 GLPUI.MPBar.text:echo(nil, "nocolor", nil)
 
 function GLPUI:UpdateVitals()
-    if gmcp.Char.Vitals.hp ~= nil then GLPUI.Vitals.HP.current = tonumber(gmcp.Char.Vitals.hp) end
-    if gmcp.Char.Vitals.max_hp ~= nil then GLPUI.Vitals.HP.max = tonumber(gmcp.Char.Vitals.max_hp) end
-    if gmcp.Char.Vitals.sp ~= nil then GLPUI.Vitals.SP.current = tonumber(gmcp.Char.Vitals.sp) end
-    if gmcp.Char.Vitals.max_sp ~= nil then GLPUI.Vitals.SP.max = tonumber(gmcp.Char.Vitals.max_sp) end
-    if gmcp.Char.Vitals.mp ~= nil then GLPUI.Vitals.MP.current = tonumber(gmcp.Char.Vitals.mp) end
-    if gmcp.Char.Vitals.max_mp ~= nil then GLPUI.Vitals.MP.max = tonumber(gmcp.Char.Vitals.max_mp) end
+    if gmcp.Char.Vitals.hp ~= nil then self.Vitals.HP.current = tonumber(gmcp.Char.Vitals.hp) end
+    if gmcp.Char.Vitals.max_hp ~= nil then self.Vitals.HP.max = tonumber(gmcp.Char.Vitals.max_hp) end
+    if gmcp.Char.Vitals.sp ~= nil then self.Vitals.SP.current = tonumber(gmcp.Char.Vitals.sp) end
+    if gmcp.Char.Vitals.max_sp ~= nil then self.Vitals.SP.max = tonumber(gmcp.Char.Vitals.max_sp) end
+    if gmcp.Char.Vitals.mp ~= nil then self.Vitals.MP.current = tonumber(gmcp.Char.Vitals.mp) end
+    if gmcp.Char.Vitals.max_mp ~= nil then self.Vitals.MP.max = tonumber(gmcp.Char.Vitals.max_mp) end
 
-    if GLPUI.Vitals.HP.current ~= nil and GLPUI.Vitals.HP.max ~= nil then
+    if self.Vitals and self.Vitals.HP and self.Vitals.HP.current and self.Vitals.HP.max then
         self:UpdateBar(
             self.HPBar,
             self.Vitals.HP.current,
@@ -113,7 +113,7 @@ function GLPUI:UpdateVitals()
         )
     end
 
-    if GLPUI.Vitals.SP.current ~= nil and GLPUI.Vitals.SP.max ~= nil then
+    if self.Vitals and self.Vitals.SP and self.Vitals.SP.current and self.Vitals.SP.max then
         self:UpdateBar(
             self.SPBar,
             self.Vitals.SP.current,
@@ -121,7 +121,7 @@ function GLPUI:UpdateVitals()
         )
     end
 
-    if GLPUI.Vitals.MP.current ~= nil and GLPUI.Vitals.MP.max ~= nil then
+    if self.Vitals and self.Vitals.MP and self.Vitals.MP.current and self.Vitals.MP.max then
         self:UpdateBar(
             self.MPBar,
             self.Vitals.MP.current,
@@ -229,7 +229,9 @@ GLPUI.CapBar.text:setFontSize(GLPUI.metrics.gauge_font_size)
 GLPUI.CapBar.text:echo(nil, "nocolor", nil)
 
 function GLPUI:UpdateXP()
-    if gmcp.Char.Status.xp == nil or gmcp.Char.Status.tnl == nil then return end
+    if gmcp.Char.Status.xp == nil or gmcp.Char.Status.tnl == nil then
+        return
+    end
 
     local xp = tonumber(gmcp.Char.Status.xp)
     local tnl = tonumber(gmcp.Char.Status.tnl)

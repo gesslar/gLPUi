@@ -56,14 +56,14 @@ function GLPUI:UpdateBar(bar, value, max, text)
     local per = (value / max) * 100.0
     local bar_max = 100
 
-    local value = per
+    local adjusted_value = per
     if per > 100 then
-        value = 100
+        adjusted_value = 100
     elseif per < 6 then
         if value <= 0 then
-            value = 0
+            adjusted_value = 0
         else
-            value = 6
+            adjusted_value = 6
         end
     end
 
@@ -71,5 +71,5 @@ function GLPUI:UpdateBar(bar, value, max, text)
         text = string.format("%.1f%%", per)
     end
 
-    bar:setValue(value, bar_max, text)
+    bar:setValue(adjusted_value, bar_max, text)
 end
