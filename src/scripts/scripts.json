@@ -16,5 +16,11 @@
               "isFolder": "no",
               "name": "gLPUi",
               "script": ""
+       },
+       {
+              "isActive": "yes",
+              "isFolder": "no",
+              "name": "Mapper",
+              "script": ""
        }
 ]
