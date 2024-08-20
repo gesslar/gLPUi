@@ -15,6 +15,7 @@ function GLPUI:Uninstall(_, package)
                 deleteNamedEventHandler(self.appName, v)
             end
         end
+        GLPUI.PanelWindow:hide()
         setBorderBottom(0)
         self.MainContainer:hide()
         cecho("<red>You have uninstalled gLPUi.\n")

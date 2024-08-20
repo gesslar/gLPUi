@@ -1,10 +1,10 @@
 mudlet = mudlet or {}; mudlet.mapper_script = true
 
-local GenericMapper = {}
-GenericMapper.__index = GenericMapper
+local GMAP = {}
+GMAP.__index = GMAP
 
-function GenericMapper.New()
-    local self = setmetatable({}, GenericMapper)
+function GMAP.New()
+    local self = setmetatable({}, GMAP)
     self.room_info = nil
     self.prev_info = nil
     self.aliases = {}
@@ -27,7 +27,7 @@ function GenericMapper.New()
 end
 
 -- Terrain types for room environments with RGBA color codes
-GenericMapper.terrain_types = {
+GMAP.terrain_types = {
     ["grass"] = {id = 500, color = {0, 255, 0, 255}},    -- Green
     ["forest"] = {id = 501, color = {0, 100, 0, 255}},   -- Dark Green
     ["road"] = {id = 502, color = {139, 69, 19, 255}},   -- Brown
@@ -39,11 +39,11 @@ GenericMapper.terrain_types = {
 }
 
 -- Set custom environment colors for terrain types
-for terrain, data in pairs(GenericMapper.terrain_types) do
+for terrain, data in pairs(GMAP.terrain_types) do
     setCustomEnvColor(data.id, data.color[1], data.color[2], data.color[3], data.color[4])
 end
 
-GenericMapper.exit_map = {
+GMAP.exit_map = {
     n = 'north',    ne = 'northeast', nw = 'northwest',
     e = 'east',     w = 'west',
     s = 'south',    se = 'southeast', sw = 'southwest',
@@ -52,7 +52,7 @@ GenericMapper.exit_map = {
 }
 
 -- Mapping of direction names to their numeric representations and vice versa
-GenericMapper.stub_map = {
+GMAP.stub_map = {
     [1] = "north", [2] = "northeast", [3] = "northwest", [4] = "east", [5] = "west",
     [6] = "south", [7] = "southeast", [8] = "southwest", [9] = "up", [10] = "down",
     [11] = "in", [12] = "out", [13] = "northup", [14] = "southdown",
@@ -65,7 +65,7 @@ GenericMapper.stub_map = {
     westup = 19, eastdown = 20
 }
 
-function GenericMapper:MakeRoom(hash)
+function GMAP:MakeRoom(hash)
     local info = self.room_info
     local room_id = getRoomIDbyHash(hash)
     if room_id == -1 then
@@ -114,7 +114,7 @@ function GenericMapper:MakeRoom(hash)
     return room_id
 end
 
-function GenericMapper:CalculateCoordinates(roomID)
+function GMAP:CalculateCoordinates(roomID)
     local default_coordinates = {0, 0, 0}
 
     if self.current_room == -1 then
@@ -143,7 +143,7 @@ function GenericMapper:CalculateCoordinates(roomID)
     return coords
 end
 
-function GenericMapper:UpdateExits(room_id, info)
+function GMAP:UpdateExits(room_id, info)
     local current_exits = getRoomExits(room_id)
     local current_stubs = getExitStubs(room_id)
 
@@ -177,7 +177,7 @@ function GenericMapper:UpdateExits(room_id, info)
     end
 end
 
-function GenericMapper:HandleMove()
+function GMAP:HandleMove()
     local info = self.room_info
     if not info.roomhash then
         return
@@ -193,7 +193,7 @@ function GenericMapper:HandleMove()
     updateMap()
 end
 
-function GenericMapper:Speedwalk(targetHash)
+function GMAP:Speedwalk(targetHash)
     if not self.room_info or not self.room_info.roomhash then
         return
     end
@@ -222,11 +222,7 @@ end
 
 -- doSpeedWalk remains a local function
 function doSpeedWalk()
-    local ok, err = stopSpeedwalk()
-    display(ok, err)
-    if ok then
-        cecho("<red>Current speedwalk interrupted.\n")
-    end
+    stopSpeedwalk()
 
     if not gmap.room_info or not gmap.room_info.roomhash then
         return
@@ -253,12 +249,12 @@ function doSpeedWalk()
     end
 end
 
-function GenericMapper:setSpeedwalkDelay(delay)
+function GMAP:setSpeedwalkDelay(delay)
     self.configs.speedwalk_delay = tonumber(delay) or 0
     echo("Speedwalk delay set to " .. self.configs.speedwalk_delay .. " seconds.\n")
 end
 
-function GenericMapper:eventHandler(event, ...)
+function GMAP:eventHandler(event, ...)
     -- Ignore events that are not gmcp.Room.Info
     if event ~= "gmcp.Room.Info" and event ~= "gmcp.Room.Travel" then return end
 
@@ -290,22 +286,23 @@ function GenericMapper:eventHandler(event, ...)
     self:HandleMove()
 end
 
-function GenericMapper:Install(_, package)
-    if package == "gmap" then
+function GMAP:Install(_, package)
+    if package == "gLPUi" then
         self:setup()
-        cecho("<green>Generic Mapper installed and initialized.\n")
+        cecho("<green>Mapper installed and initialized.\n")
     end
 end
 
-function GenericMapper:Uninstall(_, package)
-    if package == "gmap" then
+function GMAP:Uninstall(_, package)
+    display("Package: " .. package)
+    if package == "gLPUi" then
         self:teardown()
-        cecho("<red>Generic Mapper uninstalled.\n")
+        cecho("<red>Mapper uninstalled.\n")
         gmap = {}
     end
 end
 
-function GenericMapper:setup()
+function GMAP:setup()
     -- Register event handlers
     local handler
 
@@ -324,20 +321,30 @@ function GenericMapper:setup()
         table.insert(self.event_handlers, handler)
     end
 
-    -- Setup the map widget
-    -- openMapWidget("l")
+    -- Create a single alias for speedwalk commands
+    self.aliases.speedwalk = tempAlias("^speedwalk(.*)$", function()
+        local input = matches[2]:trim()
+        local command, value = input:match("^(%S+)%s*(.*)$")
 
-    -- Create temporary aliases for speedwalk delay
-    self.aliases.setSpeedwalkDelay = tempAlias("^speedwalk delay (.+)$", function()
-        self:setSpeedwalkDelay(matches[2])
-    end)
-
-    self.aliases.checkSpeedwalkDelay = tempAlias("^speedwalk delay$", function()
-        echo("Current speedwalk delay is " .. (self.configs.speedwalk_delay or 0) .. " seconds.\n")
+        if input == "" then
+            -- No arguments provided, show syntax
+            cecho("<red>Syntax: speedwalk delay [delay]\n")
+        elseif command == "delay" then
+            if value ~= "" then
+                -- Set new delay
+                self:setSpeedwalkDelay(value)
+            else
+                -- Check current delay
+                echo("Current speedwalk delay is " .. (self.configs.speedwalk_delay or 0) .. " seconds.\n")
+            end
+        else
+            -- Invalid command
+            cecho("<red>Invalid speedwalk command. Syntax: speedwalk delay [delay]\n")
+        end
     end)
 end
 
-function GenericMapper:teardown()
+function GMAP:teardown()
     -- Kill event handlers
     for _, handler in ipairs(self.event_handlers) do
         deleteNamedEventHandler("gmap", handler)
@@ -349,9 +356,6 @@ function GenericMapper:teardown()
         killAlias(id)
     end
     self.aliases = {}
-
-    -- Close the map widget if needed
-    -- closeMapWidget() -- Uncomment if you have a function to close the map widget
 end
 
 -- Helper functions
@@ -373,25 +377,21 @@ function table_contains(t, element)
 end
 
 -- Create an instance of GenericMapper
-gmap = GenericMapper.New()
+gmap = GMAP.New()
 
 -- Register install and uninstall handlers
 local handler
 
 handler = "gmap:Install"
 registerNamedEventHandler(
-    "gmap",
-    handler,
-    "sysInstallPackage",
-    function(...) gmap:Install(...) end,
+    "gmap", handler, "sysInstallPackage", function(...)
+        gmap:Install(...) end,
     true
 )
 
 handler = "gmap:Uninstall"
 if registerNamedEventHandler(
-    "gmap",
-    handler,
-    "sysUninstallPackage",
+    "gmap", handler, "sysUninstallPackage",
     function(...) gmap:Uninstall(...) end
 ) then
     table.insert(gmap.event_handlers, handler)
@@ -407,11 +407,11 @@ end)
 -- Call gmap:setup() at the bottom of the file
 gmap:setup()
 
-function GenericMapper:GetCurrentRoom()
+function GMAP:GetCurrentRoom()
     return self.current_room or -1
 end
 
-function GenericMapper:DisplayCurrentRoom()
+function GMAP:DisplayCurrentRoom()
     local roomID = self:GetCurrentRoom()
     if roomID == -1 then
         echo("No current room set.\n")
@@ -434,7 +434,7 @@ function GenericMapper:DisplayCurrentRoom()
     end
 end
 
-function GenericMapper:DisplayMapGrid(roomID)
+function GMAP:DisplayMapGrid(roomID)
     if not roomID then
         echo("No room ID provided.\n")
         return
@@ -470,7 +470,7 @@ function GenericMapper:DisplayMapGrid(roomID)
     end
 end
 
-function GenericMapper:DisplayMapGrid()
+function GMAP:DisplayMapGrid()
     local rooms = getRooms()
     local minX, maxX, minY, maxY = math.huge, -math.huge, math.huge, -math.huge
     local grid = {}
@@ -492,7 +492,7 @@ function GenericMapper:DisplayMapGrid()
     end
 end
 
-function GenericMapper:testSpeedwalk(from, to)
+function GMAP:testSpeedwalk(from, to)
     local start_room = from == 1 and 1 or (from == 2 and 4 or 8)
     local end_room = to == 1 and 1 or (to == 2 and 4 or 8)
 
@@ -506,14 +506,14 @@ function GenericMapper:testSpeedwalk(from, to)
     end
 end
 
-function GenericMapper:checkRoomExits(roomID)
+function GMAP:checkRoomExits(roomID)
     local exits = getRoomExits(roomID)
     for dir, target_id in pairs(exits) do
         echo("  " .. dir .. " -> " .. target_id .. "\n")
     end
 end
 
-function GenericMapper:displayAllRooms()
+function GMAP:displayAllRooms()
     local rooms = getRooms()
     for id, room in pairs(rooms) do
         local name = getRoomName(id) or "Unnamed Room"

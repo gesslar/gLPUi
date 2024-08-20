@@ -271,42 +271,23 @@ local handler
 
 handler = GLPUI.appName .. ":UpdateVitals"
 if registerNamedEventHandler(
-    GLPUI.appName,
-    handler,
-    "gmcp.Char.Vitals",
-    "GLPUI:UpdateVitals"
-) then
-    GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler
-end
+    GLPUI.appName, handler, "gmcp.Char.Vitals", "GLPUI:UpdateVitals"
+) then GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler end
 
 handler = GLPUI.appName .. ":UpdateXP"
 if registerNamedEventHandler(
-    GLPUI.appName,
-    handler,
-    "gmcp.Char.Status",
-    "GLPUI:UpdateXP"
-) then
-    GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler
-end
+    GLPUI.appName, handler, "gmcp.Char.Status", "GLPUI:UpdateXP"
+) then GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler end
 
 handler = GLPUI.appName .. ":UpdateFoe"
 if registerNamedEventHandler(
-    GLPUI.appName,
-    handler,
-    "gmcp.Char.Status",
-    "GLPUI:UpdateFoe"
-) then
-    GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler
-end
+    GLPUI.appName, handler, "gmcp.Char.Status", "GLPUI:UpdateFoe"
+) then GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler end
 
 handler = GLPUI.appName .. ":UpdateCapacity"
 if registerNamedEventHandler(
-    GLPUI.appName,
-    handler,
-    "gmcp.Char.Status",
-    "GLPUI:UpdateCapacity"
-) then
-    GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler
+    GLPUI.appName, handler, "gmcp.Char.Status", "GLPUI:UpdateCapacity"
+) then GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler
 end
 
 GLPUI.PanelWindow = GLPUI.PanelWindow or Geyser.UserWindow:new({
@@ -444,50 +425,25 @@ end
 
 handler = GLPUI.appName .. ":ListInventory"
 if registerNamedEventHandler(
-    GLPUI.appName,
-    handler,
-    "gmcp.Item.List",
-    "GLPUI:UpdateInventory"
-) then
-    GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler
-end
+    GLPUI.appName, handler, "gmcp.Item.List", "GLPUI:UpdateInventory"
+) then GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler end
 
 handler = GLPUI.appName .. ":AddInventory"
 if registerNamedEventHandler(
-    GLPUI.appName,
-    handler,
-    "gmcp.Item.Add",
-    "GLPUI:UpdateInventory"
-) then
-    GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler
-end
+    GLPUI.appName, handler, "gmcp.Item.Add", "GLPUI:UpdateInventory"
+) then GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler end
 
 handler = GLPUI.appName .. ":RemoveInventory"
 if registerNamedEventHandler(
-    GLPUI.appName,
-    handler,
-    "gmcp.Item.Remove",
-    "GLPUI:UpdateInventory"
-) then
-    GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler
-end
+    GLPUI.appName, handler, "gmcp.Item.Remove", "GLPUI:UpdateInventory"
+) then GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler end
 
 handler = GLPUI.appName .. ":UpdateInventory"
 if registerNamedEventHandler(
-    GLPUI.appName,
-    handler,
-    "gmcp.Item.Update",
-    "GLPUI:UpdateInventory"
-) then
-    GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler
-end
+    GLPUI.appName, handler, "gmcp.Item.Update", "GLPUI:UpdateInventory"
+) then GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler end
 
 handler = GLPUI.appName .. ":Disconnect"
 if registerNamedEventHandler(
-    GLPUI.appName,
-    handler,
-    "sysDisconnectionEvent",
-    "GLPUI:Disconnect"
-) then
-    GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler
-end
+    GLPUI.appName, handler, "sysDisconnectionEvent", "GLPUI:Disconnect"
+) then GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler end
