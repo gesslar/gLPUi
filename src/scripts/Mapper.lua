@@ -3,13 +3,26 @@ mudlet = mudlet or {}; mudlet.mapper_script = true
 local GenericMapper = {}
 GenericMapper.__index = GenericMapper
 
-function GenericMapper.new()
+function GenericMapper.New()
     local self = setmetatable({}, GenericMapper)
-    self.room_info = {}
+    self.room_info = nil
+    self.prev_info = nil
     self.aliases = {}
-    self.configs = {speedwalk_delay = 5.0}
-    self.EventHandlers = {}
+    self.configs = {speedwalk_delay = 0.5}
+    self.event_handlers = {}
     self.current_room = -1
+    self.move_vectors = {
+        north = {0, 1, 0},
+        south = {0, -1, 0},
+        east = {1, 0, 0},
+        west = {-1, 0, 0},
+        northwest = {-1, 1, 0},
+        northeast = {1, 1, 0},
+        southwest = {-1, -1, 0},
+        southeast = {1, -1, 0},
+        up = {0, 0, 1},
+        down = {0, 0, -1},
+    }
     return self
 end
 
@@ -30,7 +43,7 @@ for terrain, data in pairs(GenericMapper.terrain_types) do
     setCustomEnvColor(data.id, data.color[1], data.color[2], data.color[3], data.color[4])
 end
 
-local exitmap = {
+GenericMapper.exit_map = {
     n = 'north',    ne = 'northeast', nw = 'northwest',
     e = 'east',     w = 'west',
     s = 'south',    se = 'southeast', sw = 'southwest',
@@ -39,7 +52,7 @@ local exitmap = {
 }
 
 -- Mapping of direction names to their numeric representations and vice versa
-local stubmap = {
+GenericMapper.stub_map = {
     [1] = "north", [2] = "northeast", [3] = "northwest", [4] = "east", [5] = "west",
     [6] = "south", [7] = "southeast", [8] = "southwest", [9] = "up", [10] = "down",
     [11] = "in", [12] = "out", [13] = "northup", [14] = "southdown",
@@ -52,99 +65,135 @@ local stubmap = {
     westup = 19, eastdown = 20
 }
 
-function GenericMapper:make_room(hash)
+function GenericMapper:MakeRoom(hash)
     local info = self.room_info
-    local roomID = getRoomIDbyHash(hash)
-    if roomID == -1 then
-        roomID = createRoomID()
-        addRoom(roomID)
-        setRoomIDbyHash(roomID, hash)
+    local room_id = getRoomIDbyHash(hash)
+    if room_id == -1 then
+        room_id = createRoomID()
+        addRoom(room_id)
+        setRoomIDbyHash(room_id, hash)
     end
 
-    if getRoomName(roomID) ~= info.name then
-        setRoomName(roomID, info.name or "Unexplored Room")
+    if getRoomName(room_id) ~= info.name then
+        setRoomName(room_id, info.name or "Unexplored Room")
     end
 
-    local areaName = info.area or "Olum"
-    local areaID = getAreaTable()[areaName]
-    if not areaID then
-        areaID = addAreaName(areaName)
+    local area_name = info.area or "Undefined"
+    local area_id = getAreaTable()[area_name]
+    if not area_id then
+        area_id = addAreaName(area_name)
     end
-    if getRoomArea(roomID) ~= areaID then
-        setRoomArea(roomID, areaID)
-    end
-
-    local x, y, z = tonumber(info.coords[1]), tonumber(info.coords[2]), tonumber(info.coords[3])
-    local currentX, currentY, currentZ = getRoomCoordinates(roomID)
-    if x ~= currentX or y ~= currentY or z ~= currentZ then
-        setRoomCoordinates(roomID, x, y, z)
+    if getRoomArea(room_id) ~= area_id then
+        setRoomArea(room_id, area_id)
     end
 
-    local envID
-    if info.environment then
-        envID = GenericMapper.terrain_types[info.environment] and GenericMapper.terrain_types[info.environment].id or GenericMapper.terrain_types["default"].id
+    local coords
+    if info.coords then
+        coords = info.coords
     else
-        envID = GenericMapper.terrain_types["default"].id
+        -- Calculate coordinates based on previous room
+        coords = self:CalculateCoordinates(room_id)
     end
 
-    if getRoomEnv(roomID) ~= envID then
-        setRoomEnv(roomID, envID)
+    local cx, cy, cz = getRoomCoordinates(room_id)
+    if coords[1] ~= cx or coords[2] ~= cy or coords[3] ~= cz then
+        setRoomCoordinates(room_id, coords[1], coords[2], coords[3])
     end
 
-    return roomID
+    local env_id
+    if info.environment then
+        env_id = self.terrain_types[info.environment] and self.terrain_types[info.environment].id or self.terrain_types["default"].id
+    else
+        env_id = self.terrain_types["default"].id
+    end
+
+    if getRoomEnv(room_id) ~= env_id then
+        setRoomEnv(room_id, env_id)
+    end
+
+    return room_id
 end
 
-function GenericMapper:update_exits(roomID, info)
-    local currentExits = getRoomExits(roomID)
-    local currentStubs = getExitStubs(roomID)
+function GenericMapper:CalculateCoordinates(roomID)
+    local default_coordinates = {0, 0, 0}
+
+    if self.current_room == -1 then
+        return default_coordinates
+    end
+
+    local prev_room_id = getRoomIDbyHash(self.prev_info.roomhash)
+
+    if prev_room_id == -1 then
+        return default_coordinates
+    end
+
+    local coords = {getRoomCoordinates(prev_room_id)} or {0, 0, 0}
+    local shift = {0, 0, 0}
+    for k, v in pairs(self.room_info.exits) do
+        if v == self.prev_info.roomhash and self.move_vectors[k] then
+            shift = self.move_vectors[k]
+            break
+        end
+    end
+
+    for n = 1, 3 do
+        coords[n] = coords[n] - shift[n]
+    end
+
+    return coords
+end
+
+function GenericMapper:UpdateExits(room_id, info)
+    local current_exits = getRoomExits(room_id)
+    local current_stubs = getExitStubs(room_id)
 
     -- Update or add new exits
     for dir, hash in pairs(info.exits) do
-        local exitRoomID = getRoomIDbyHash(hash)
+        local exit_room_id = getRoomIDbyHash(hash)
 
-        if exitRoomID ~= -1 then
+        if exit_room_id ~= -1 then
             -- This is a room we've seen before
 
             -- Check if the exit already exists
-            if not currentExits[dir] then
-                setExitStub(roomID, dir, true)
-                connectExitStub(exitRoomID, roomID)
-            elseif currentExits[dir] ~= exitRoomID then
-                connectExitStub(roomID, exitRoomID)
+            if not current_exits[dir] then
+                setExitStub(room_id, dir, true)
+                connectExitStub(exit_room_id, room_id)
+            elseif current_exits[dir] ~= exit_room_id then
+                connectExitStub(room_id, exit_room_id)
             end
         else
             -- This is an unexplored exit
-            if not table_contains(currentStubs, stubmap[dir]) then
-                setExitStub(roomID, dir, true)
+            if not table_contains(current_stubs, self.stub_map[dir]) then
+                setExitStub(room_id, dir, true)
             end
         end
     end
 
     -- Remove exits that no longer exist
-    for dir, exitRoomID in pairs(currentExits) do
+    for dir, exit_room_id in pairs(current_exits) do
         if not info.exits[dir] then
-            setExit(roomID, -1, dir)
+            setExit(room_id, -1, dir)
         end
     end
 end
 
-function GenericMapper:handle_move()
+function GenericMapper:HandleMove()
     local info = self.room_info
     if not info.roomhash then
         return
     end
 
-    local roomID = self:make_room(info.roomhash)
+    local room_id = self:MakeRoom(info.roomhash)
 
-    self:update_exits(roomID, info)
+    self:UpdateExits(room_id, info)
 
-    centerview(roomID)
-    self.current_room = roomID
+    centerview(room_id)
+    self.current_room = room_id
 
     updateMap()
 end
 
-function GenericMapper:speedwalk(targetHash)
+function GenericMapper:Speedwalk(targetHash)
     if not self.room_info or not self.room_info.roomhash then
         return
     end
@@ -173,29 +222,34 @@ end
 
 -- doSpeedWalk remains a local function
 function doSpeedWalk()
-    display("Calling doSpeedWalk")
+    local ok, err = stopSpeedwalk()
+    display(ok, err)
+    if ok then
+        cecho("<red>Current speedwalk interrupted.\n")
+    end
+
     if not gmap.room_info or not gmap.room_info.roomhash then
         return
     end
 
-    local startRoomID = getRoomIDbyHash(gmap.room_info.roomhash)
+    local start_room_id = getRoomIDbyHash(gmap.room_info.roomhash)
 
     if type(speedWalkPath) ~= "table" or #speedWalkPath == 0 then
-        gmap:echo("No path to chosen room found.", false, true)
+        echo("No path to chosen room found.\n")
         return
     end
 
-    local targetRoomID = speedWalkPath[#speedWalkPath]
+    local target_room_id = speedWalkPath[#speedWalkPath]
 
-    local pathExists = getPath(startRoomID, targetRoomID)
+    local path_exists = getPath(start_room_id, target_room_id)
 
-    if pathExists then
-        local targetHash = getRoomHashByID(targetRoomID)
-        if targetHash then
-            gmap:speedwalk(targetHash)
+    if path_exists then
+        local target_hash = getRoomHashByID(target_room_id)
+        if target_hash then
+            gmap:Speedwalk(target_hash)
         end
     else
-        gmap:echo("No path to chosen room found.", false, true)
+        echo("No path to chosen room found.\n")
     end
 end
 
@@ -205,18 +259,35 @@ function GenericMapper:setSpeedwalkDelay(delay)
 end
 
 function GenericMapper:eventHandler(event, ...)
-    if event == "gmcp.Room.Info" then
-        self.room_info = {
-            roomhash = gmcp.Room.Info.roomhash,
-            area = gmcp.Room.Info.area,
-            name = gmcp.Room.Info.name,
-            environment = gmcp.Room.Info.environment,
-            symbol = gmcp.Room.Info.symbol,
-            exits = table.deepcopy(gmcp.Room.Info.exits),
-            coords = gmcp.Room.Info.coords
-        }
-        self:handle_move()
+    -- Ignore events that are not gmcp.Room.Info
+    if event ~= "gmcp.Room.Info" and event ~= "gmcp.Room.Travel" then return end
+
+    if event == "gmcp.Room.Travel" then
+        if not gmcp.Room.Travel.destination or gmcp.Room.Travel.destination == "" then
+            return
+        end
+
+        self:Speedwalk(gmcp.Room.Travel.destination)
+        return
     end
+
+    self.prev_info = self.room_info
+
+    if self.prev_info then
+        self.prev_info.room_id = getRoomIDbyHash(self.prev_info.roomhash)
+    end
+
+    self.room_info = {
+        roomhash = gmcp.Room.Info.roomhash,
+        area = gmcp.Room.Info.area,
+        name = gmcp.Room.Info.name,
+        environment = gmcp.Room.Info.environment,
+        symbol = gmcp.Room.Info.symbol,
+        exits = table.deepcopy(gmcp.Room.Info.exits),
+        coords = gmcp.Room.Info.coords
+    }
+
+    self:HandleMove()
 end
 
 function GenericMapper:Install(_, package)
@@ -240,16 +311,21 @@ function GenericMapper:setup()
 
     handler = "gmap:gmcp.Room.Info"
     if registerNamedEventHandler("gmap", handler, "gmcp.Room.Info", function(...) self:eventHandler(...) end) then
-        table.insert(self.EventHandlers, handler)
+        table.insert(self.event_handlers, handler)
     end
 
     handler = "gmap:sysConnectionEvent"
     if registerNamedEventHandler("gmap", handler, "sysConnectionEvent", function(...) self:eventHandler(...) end) then
-        table.insert(self.EventHandlers, handler)
+        table.insert(self.event_handlers, handler)
+    end
+
+    handler = "gmap:gmcp.Room.Travel"
+    if registerNamedEventHandler("gmap", handler, "gmcp.Room.Travel", function(...) self:eventHandler(...) end) then
+        table.insert(self.event_handlers, handler)
     end
 
     -- Setup the map widget
-    openMapWidget("l")
+    -- openMapWidget("l")
 
     -- Create temporary aliases for speedwalk delay
     self.aliases.setSpeedwalkDelay = tempAlias("^speedwalk delay (.+)$", function()
@@ -263,10 +339,10 @@ end
 
 function GenericMapper:teardown()
     -- Kill event handlers
-    for _, handler in ipairs(self.EventHandlers) do
+    for _, handler in ipairs(self.event_handlers) do
         deleteNamedEventHandler("gmap", handler)
     end
-    self.EventHandlers = {}
+    self.event_handlers = {}
 
     -- Remove the temporary aliases
     for name, id in pairs(self.aliases) do
@@ -275,7 +351,7 @@ function GenericMapper:teardown()
     self.aliases = {}
 
     -- Close the map widget if needed
-    closeMapWidget() -- Uncomment if you have a function to close the map widget
+    -- closeMapWidget() -- Uncomment if you have a function to close the map widget
 end
 
 -- Helper functions
@@ -297,7 +373,7 @@ function table_contains(t, element)
 end
 
 -- Create an instance of GenericMapper
-gmap = GenericMapper.new()
+gmap = GenericMapper.New()
 
 -- Register install and uninstall handlers
 local handler
@@ -318,7 +394,7 @@ if registerNamedEventHandler(
     "sysUninstallPackage",
     function(...) gmap:Uninstall(...) end
 ) then
-    table.insert(gmap.EventHandlers, handler)
+    table.insert(gmap.event_handlers, handler)
 end
 
 -- Add this with your other event handler registrations
@@ -331,12 +407,12 @@ end)
 -- Call gmap:setup() at the bottom of the file
 gmap:setup()
 
-function GenericMapper:getCurrentRoom()
+function GenericMapper:GetCurrentRoom()
     return self.current_room or -1
 end
 
-function GenericMapper:displayCurrentRoom()
-    local roomID = self:getCurrentRoom()
+function GenericMapper:DisplayCurrentRoom()
+    local roomID = self:GetCurrentRoom()
     if roomID == -1 then
         echo("No current room set.\n")
         return
@@ -358,7 +434,7 @@ function GenericMapper:displayCurrentRoom()
     end
 end
 
-function GenericMapper:displayRoom(roomID)
+function GenericMapper:DisplayMapGrid(roomID)
     if not roomID then
         echo("No room ID provided.\n")
         return
@@ -386,15 +462,15 @@ function GenericMapper:displayRoom(roomID)
         local exitHash = getRoomHashByID(exitID) or "Unknown"
         echo("    " .. dir .. ": " .. exitName .. " (ID: " .. exitID .. ", Hash: " .. exitHash .. ")\n")
     end
-    for _, stubNum in ipairs(stubs) do
-        local dir = stubmap[stubNum]
+    for _, stub_num in ipairs(stubs) do
+        local dir = self.stub_map[stub_num]
         if dir then
             echo("    " .. dir .. ": Unexplored\n")
         end
     end
 end
 
-function GenericMapper:displayMapGrid()
+function GenericMapper:DisplayMapGrid()
     local rooms = getRooms()
     local minX, maxX, minY, maxY = math.huge, -math.huge, math.huge, -math.huge
     local grid = {}
@@ -417,23 +493,23 @@ function GenericMapper:displayMapGrid()
 end
 
 function GenericMapper:testSpeedwalk(from, to)
-    local startRoom = from == 1 and 1 or (from == 2 and 4 or 8)
-    local endRoom = to == 1 and 1 or (to == 2 and 4 or 8)
+    local start_room = from == 1 and 1 or (from == 2 and 4 or 8)
+    local end_room = to == 1 and 1 or (to == 2 and 4 or 8)
 
-    local pathExists = getPath(startRoom, endRoom)
+    local path_exists = getPath(start_room, end_room)
 
-    if pathExists then
-        local dirString = table.concat(speedWalkDir, ",")
-        speedwalk(dirString, false, self.configs.speedwalk_delay or 0, true)
+    if path_exists then
+        local dir_string = table.concat(speedWalkDir, ",")
+        speedwalk(dir_string, false, self.configs.speedwalk_delay or 0, true)
     else
-        self:echo("No path to chosen room found.", false, true)
+        echo("No path to chosen room found.\n")
     end
 end
 
 function GenericMapper:checkRoomExits(roomID)
     local exits = getRoomExits(roomID)
-    for dir, targetID in pairs(exits) do
-        echo("  " .. dir .. " -> " .. targetID .. "\n")
+    for dir, target_id in pairs(exits) do
+        echo("  " .. dir .. " -> " .. target_id .. "\n")
     end
 end
 
@@ -442,27 +518,27 @@ function GenericMapper:displayAllRooms()
     for id, room in pairs(rooms) do
         local name = getRoomName(id) or "Unnamed Room"
         local area = getRoomArea(id)
-        local areaName = getAreaTableSwap()[area] or "Unknown Area"
+        local area_name = getAreaTableSwap()[area] or "Unknown Area"
         local hash = getRoomHashByID(id) or "Unknown"
         local x, y, z = getRoomCoordinates(id)
         local env = getRoomEnv(id) or "Unknown"
         local exits = getRoomExits(id) or {}
-        local exitStubs = getExitStubs(id) or {}
+        local exit_stubs = getExitStubs(id) or {}
 
         echo("Room ID: " .. id .. "\n")
         echo("  Name: " .. name .. "\n")
-        echo("  Area: " .. areaName .. "\n")
+        echo("  Area: " .. area_name .. "\n")
         echo("  Hash: " .. hash .. "\n")
         echo("  Coordinates: " .. x .. ", " .. y .. ", " .. z .. "\n")
         echo("  Environment: " .. env .. "\n")
         echo("  Exits:\n")
-        for dir, exitID in pairs(exits) do
-            local exitName = getRoomName(exitID) or "Unknown Room"
-            echo("    " .. dir .. " -> Room " .. exitID .. " (" .. exitName .. ")\n")
+        for dir, exit_id in pairs(exits) do
+            local exit_name = getRoomName(exit_id) or "Unknown Room"
+            echo("    " .. dir .. " -> Room " .. exit_id .. " (" .. exit_name .. ")\n")
         end
-        if next(exitStubs) then
+        if next(exit_stubs) then
             echo("  Exit Stubs:\n")
-            for _, dir in ipairs(exitStubs) do
+            for _, dir in ipairs(exit_stubs) do
                 echo("    " .. dir .. "\n")
             end
         end

@@ -308,3 +308,186 @@ if registerNamedEventHandler(
 ) then
     GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler
 end
+
+GLPUI.PanelWindow = GLPUI.PanelWindow or Geyser.UserWindow:new({
+    name = "PanelWindow",
+    x = 0, y = 0,
+    width = 250, height = "100%",
+    titleText = "gLPUi",
+    docked = true,
+    dockPosition = "l",
+    restoreLayout = true,
+})
+
+GLPUI.Panel = GLPUI.Panel or Geyser.Label:new({
+    name = "Panel",
+    x = 0, y = 0,
+    width = "100%", height = "100%",
+    stylesheet = GLPUI.Styles.Panel,
+}, GLPUI.PanelWindow)
+
+GLPUI.Container = GLPUI.Container or Geyser.VBox:new({
+    name = "Container",
+    x = 0, y = 0,
+    width = "100%", height = "100%",
+}, GLPUI.Panel)
+
+GLPUI.InventoryLabel = GLPUI.InventoryLabel or Geyser.Label:new({
+    name = "InventoryLabel",
+    width = "100%", height = "100%",
+    stylesheet = GLPUI.Styles.Panel,
+}, GLPUI.Container)
+
+GLPUI.InventoryContainer = GLPUI.InventoryContainer or Geyser.VBox:new({
+    name = "InventoryContainer",
+    width = "100%", height = "100%",
+}, GLPUI.InventoryLabel)
+
+GLPUI.InventoryRoomLabel = GLPUI.InventoryRoomLabel or Geyser.Label:new({
+    name = "InventoryRoomLabel",
+    height = 30, v_policy = Geyser.Fixed,
+    stylesheet = GLPUI.Styles.Panel,
+    message = "Room",
+}, GLPUI.InventoryContainer)
+
+GLPUI.InventoryRoom = GLPUI.InventoryRoom or Geyser.MiniConsole:new({
+    name = "InventoryRoom",
+}, GLPUI.InventoryContainer)
+
+GLPUI.InventoryInvLabel = GLPUI.InventoryInvLabel or Geyser.Label:new({
+    name = "InventoryInvLabel",
+    height = 30, v_policy = Geyser.Fixed,
+    stylesheet = GLPUI.Styles.Panel,
+    message = "Inventory",
+}, GLPUI.InventoryContainer)
+
+GLPUI.InventoryInv = GLPUI.InventoryInv or Geyser.MiniConsole:new({
+    name = "InventoryInv",
+}, GLPUI.InventoryContainer)
+
+GLPUI.Map = GLPUI.Map or Geyser.Mapper:new({
+    name = "Map",
+    width = "100%", height = 300,
+    v_policy = Geyser.Fixed,
+}, GLPUI.Container)
+
+-- This table is an array of items in the room
+GLPUI.RoomInventoryList = GLPUI.RoomInventoryList or {}
+-- This table is an array of items in the inventory
+GLPUI.InventoryList = GLPUI.InventoryList or {}
+
+function GLPUI:UpdateInventory(event, ...)
+    local message, dest, widget
+
+    if not gmcp.Item then return end
+
+    if event == "gmcp.Item.List" then
+        message = gmcp.Item.List
+    elseif event == "gmcp.Item.Add" then
+        message = gmcp.Item.Add
+    elseif event == "gmcp.Item.Remove" then
+        message = gmcp.Item.Remove
+    elseif event == "gmcp.Item.Update" then
+        message = gmcp.Item.Update
+    end
+
+    if not message then return end
+
+    if message.location == "room" then
+        dest = self.RoomInventoryList
+        widget = self.InventoryRoom
+    elseif message.location == "inventory" then
+        dest = self.InventoryList
+        widget = self.InventoryInv
+    end
+
+    if not dest then return end
+
+    if event == "gmcp.Item.List" then
+        dest = table.deepcopy(message.items)
+    elseif event == "gmcp.Item.Add" then
+        dest[#dest+1] = message
+    elseif event == "gmcp.Item.Remove" then
+        for i, item in pairs(dest) do
+            if item.hash == message.hash then
+                table.remove(dest, i)
+                break
+            end
+        end
+    elseif event == "gmcp.Item.Update" then
+        for i, item in pairs(dest) do
+            if item.hash == message.hash then
+                dest[i] = message
+                break
+            end
+        end
+    end
+
+    self:UpdateInventoryWidget(widget, dest)
+end
+
+function GLPUI:UpdateInventoryWidget(widget, inventory)
+    widget:clear()
+    for i, item in pairs(inventory) do
+        local line = ansi2decho(item.name)
+        widget:decho(line .. "\n")
+    end
+end
+
+function GLPUI:Disconnect()
+    self.RoomInventoryList = {}
+    self.InventoryList = {}
+
+    self:UpdateInventoryWidget(self.InventoryRoom, self.RoomInventoryList)
+    self:UpdateInventoryWidget(self.InventoryInv, self.InventoryList)
+end
+
+handler = GLPUI.appName .. ":ListInventory"
+if registerNamedEventHandler(
+    GLPUI.appName,
+    handler,
+    "gmcp.Item.List",
+    "GLPUI:UpdateInventory"
+) then
+    GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler
+end
+
+handler = GLPUI.appName .. ":AddInventory"
+if registerNamedEventHandler(
+    GLPUI.appName,
+    handler,
+    "gmcp.Item.Add",
+    "GLPUI:UpdateInventory"
+) then
+    GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler
+end
+
+handler = GLPUI.appName .. ":RemoveInventory"
+if registerNamedEventHandler(
+    GLPUI.appName,
+    handler,
+    "gmcp.Item.Remove",
+    "GLPUI:UpdateInventory"
+) then
+    GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler
+end
+
+handler = GLPUI.appName .. ":UpdateInventory"
+if registerNamedEventHandler(
+    GLPUI.appName,
+    handler,
+    "gmcp.Item.Update",
+    "GLPUI:UpdateInventory"
+) then
+    GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler
+end
+
+handler = GLPUI.appName .. ":Disconnect"
+if registerNamedEventHandler(
+    GLPUI.appName,
+    handler,
+    "sysDisconnectionEvent",
+    "GLPUI:Disconnect"
+) then
+    GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler
+end
