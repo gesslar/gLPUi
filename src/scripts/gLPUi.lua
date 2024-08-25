@@ -1,5 +1,10 @@
 local u = utf8.escape
 
+-- This table is an array of items in the room
+GLPUI.RoomInventoryList = GLPUI.RoomInventoryList or {}
+-- This table is an array of items in the inventory
+GLPUI.InventoryList = GLPUI.InventoryList or {}
+
 GLPUI.MainContainer = GLPUI.MainContainer or Geyser.Label:new({
     name = "MainContainer",
     x = 0, y = -(GLPUI.metrics.height),
@@ -315,7 +320,7 @@ GLPUI.Container = GLPUI.Container or Geyser.VBox:new({
 
 GLPUI.InventoryLabel = GLPUI.InventoryLabel or Geyser.Label:new({
     name = "InventoryLabel",
-    width = "100%", height = "100%",
+    width = "100%",
     stylesheet = GLPUI.Styles.Panel,
 }, GLPUI.Container)
 
@@ -346,71 +351,326 @@ GLPUI.InventoryInv = GLPUI.InventoryInv or Geyser.MiniConsole:new({
     name = "InventoryInv",
 }, GLPUI.InventoryContainer)
 
+GLPUI.CoinLabel = GLPUI.CoinLabel or Geyser.Label:new({
+    name = "CoinLabel",
+    height = 25,
+    v_policy = Geyser.Fixed,
+    stylesheet = GLPUI.Styles.MainBG,
+}, GLPUI.Container)
+
+GLPUI.CoinBox = GLPUI.CoinBox or Geyser.HBox:new({
+    x = 0, y = 0,
+    height = "100%", width = "100%",
+    name = "CoinBox",
+}, GLPUI.CoinLabel)
+
+GLPUI.PlatinumBox = GLPUI.PlatinumBox or Geyser.HBox:new({
+    name = "PlatinumBox",
+    height = "100%",
+}, GLPUI.CoinBox)
+
+GLPUI.PlatinumLabel = GLPUI.PlatinumLabel or Geyser.Label:new({
+    name = "PlatinumLabel",
+    width = 25,
+    h_policy = Geyser.Fixed,
+    stylesheet = GLPUI.Styles.CoinLabel,
+    message = GLPUI.CoinConfig.symbol,
+    fontSize = GLPUI.metrics.coin_font_size,
+}, GLPUI.PlatinumBox)
+GLPUI.PlatinumLabel:echo(nil, "nocolor", nil)
+GLPUI.PlatinumLabel:setStyleSheet(f[[
+    {GLPUI.Styles.Center}
+    color: rgb({GLPUI.CoinConfig.colours.platinum[1]},{GLPUI.CoinConfig.colours.platinum[2]},{GLPUI.CoinConfig.colours.platinum[3]});
+]])
+
+GLPUI.PlatinumNumber = GLPUI.PlatinumNumber or Geyser.Label:new({
+    name = "PlatinumNumber",
+    stylesheet = GLPUI.Styles.CoinLabel,
+    message = "0",
+}, GLPUI.PlatinumBox)
+
+GLPUI.GoldBox = GLPUI.GoldBox or Geyser.HBox:new({
+    name = "GoldBox",
+    height = "100%",
+}, GLPUI.CoinBox)
+
+GLPUI.GoldLabel = GLPUI.GoldLabel or Geyser.Label:new({
+    name = "GoldLabel",
+    width = 25,
+    h_policy = Geyser.Fixed,
+    stylesheet = GLPUI.Styles.CoinLabel,
+    message = GLPUI.CoinConfig.symbol,
+    fontSize = GLPUI.metrics.coin_font_size,
+}, GLPUI.GoldBox)
+
+GLPUI.GoldLabel:echo(nil, "nocolor", nil)
+GLPUI.GoldLabel:setStyleSheet(f[[
+    {GLPUI.Styles.Center}
+    color: rgb({GLPUI.CoinConfig.colours.gold[1]},{GLPUI.CoinConfig.colours.gold[2]},{GLPUI.CoinConfig.colours.gold[3]});
+]])
+
+GLPUI.GoldNumber = GLPUI.GoldNumber or Geyser.Label:new({
+    name = "GoldNumber",
+    stylesheet = GLPUI.Styles.CoinLabel,
+    message = "0",
+}, GLPUI.GoldBox)
+
+GLPUI.SilverBox = GLPUI.SilverBox or Geyser.HBox:new({
+    name = "SilverBox",
+}, GLPUI.CoinBox)
+
+GLPUI.SilverLabel = GLPUI.SilverLabel or Geyser.Label:new({
+    name = "SilverLabel",
+    width = 25,
+    h_policy = Geyser.Fixed,
+    stylesheet = GLPUI.Styles.CoinLabel,
+    message = GLPUI.CoinConfig.symbol,
+    fontSize = GLPUI.metrics.coin_font_size,
+}, GLPUI.SilverBox)
+
+GLPUI.SilverLabel:echo(nil, "nocolor", nil)
+GLPUI.SilverLabel:setStyleSheet(f[[
+    {GLPUI.Styles.Center}
+    color: rgb({GLPUI.CoinConfig.colours.silver[1]},{GLPUI.CoinConfig.colours.silver[2]},{GLPUI.CoinConfig.colours.silver[3]});
+]])
+
+GLPUI.SilverNumber = GLPUI.SilverNumber or Geyser.Label:new({
+    name = "SilverNumber",
+    stylesheet = GLPUI.Styles.CoinLabel,
+    message = "0",
+}, GLPUI.SilverBox)
+
+GLPUI.CopperBox = GLPUI.CopperBox or Geyser.HBox:new({
+    name = "CopperBox",
+    height = "100%",
+}, GLPUI.CoinBox)
+
+GLPUI.CopperLabel = GLPUI.CopperLabel or Geyser.Label:new({
+    name = "CopperLabel",
+    width = 25,
+    h_policy = Geyser.Fixed,
+    stylesheet = GLPUI.Styles.CoinLabel,
+    message = GLPUI.CoinConfig.symbol,
+    fontSize = GLPUI.metrics.coin_font_size,
+}, GLPUI.CopperBox)
+
+GLPUI.CopperLabel:echo(nil, "nocolor", nil)
+GLPUI.CopperLabel:setStyleSheet(f[[
+    {GLPUI.Styles.Center}
+    color: rgb({GLPUI.CoinConfig.colours.copper[1]},{GLPUI.CoinConfig.colours.copper[2]},{GLPUI.CoinConfig.colours.copper[3]});
+]])
+
+GLPUI.CopperNumber = GLPUI.CopperNumber or Geyser.Label:new({
+    name = "CopperNumber",
+    stylesheet = GLPUI.Styles.CoinLabel,
+    message = "0",
+}, GLPUI.CopperBox)
+
+local function Capitalize(str)
+    return (str:gsub("^%l", string.upper))
+end
+
+local function add_commas(number)
+    local num_str
+    local result = ""
+    local len
+    local dot_index
+    local insert_position
+    local is_negative = false
+
+    if type(number) == "number" then
+        num_str = tostring(number)
+    elseif type(number) == "string" then
+        dot_index = string.find(number, "%.", 1, true)
+        if dot_index then
+            local int_part = string.sub(number, 1, dot_index - 1)
+            return string.format("%s.%s", add_commas(tonumber(int_part)), string.sub(number, dot_index + 1))
+        else
+            number = tonumber(number)
+        end
+        if not number then
+            error("add_commas: Argument 1 must be a number, or a string that can be converted to a number.")
+        end
+        return add_commas(number)
+    else
+        error("add_commas: Argument 1 must be a number, or a string that can be converted to a number.")
+    end
+
+    -- Check if the number is negative
+    if string.sub(num_str, 1, 1) == "-" then
+        is_negative = true
+        num_str = string.sub(num_str, 2) -- Remove the negative sign for processing
+    end
+
+    len = #num_str
+    dot_index = string.find(num_str, "%.", 1, true)
+
+    -- If there's a decimal point, handle the fractional part separately
+    if dot_index then
+        result = add_commas(tonumber(string.sub(num_str, 1, dot_index - 1))) -- Recurse on the integer part
+        result = string.format("%s.%s", result, string.sub(num_str, dot_index + 1))
+        return is_negative and "-" .. result or result
+    end
+
+    -- Calculate where to start inserting commas
+    insert_position = (len % 3 == 0) and 3 or (len % 3)
+
+    for i = 1, len do
+        result = result .. string.sub(num_str, i, i)
+        if i == insert_position and i ~= len then
+            result = result .. ","
+            insert_position = insert_position + 3
+        end
+    end
+
+    return is_negative and "-" .. result or result
+end
+
+function GLPUI:UpdateCoin(type)
+    local widget = self[Capitalize(type) .. "Number"]
+    local value = self.Coins[type]
+
+    widget:echo(add_commas(value))
+end
+
+function GLPUI:UpdateCoins()
+    local coins = gmcp.Char.Status.wealth
+
+    if #table.keys(coins) == 0 then
+        for type, _ in pairs(self.Coins) do
+            self.Coins[type] = 0
+            self:UpdateCoin(type)
+        end
+    else
+        for type, _ in pairs(self.Coins) do
+            if table.contains(coins, type) then
+                self.Coins[type] = tonumber(coins[type])
+                self:UpdateCoin(type)
+            end
+        end
+    end
+end
+
+handler = GLPUI.appName .. ":UpdateCoins"
+if registerNamedEventHandler(
+    GLPUI.appName, handler, "gmcp.Char.Status", "GLPUI:UpdateCoins"
+) then GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler end
+
 GLPUI.Map = GLPUI.Map or Geyser.Mapper:new({
     name = "Map",
     width = "100%", height = 300,
     v_policy = Geyser.Fixed,
 }, GLPUI.Container)
 
--- This table is an array of items in the room
-GLPUI.RoomInventoryList = GLPUI.RoomInventoryList or {}
--- This table is an array of items in the inventory
-GLPUI.InventoryList = GLPUI.InventoryList or {}
+function GLPUI:ConvertAttributes(location, attribute_string)
+    local attributes = {}
 
-function GLPUI:UpdateInventory(event, ...)
-    local message, dest, widget
-
-    if not gmcp.Item then return end
-
-    if event == "gmcp.Item.List" then
-        message = gmcp.Item.List
-    elseif event == "gmcp.Item.Add" then
-        message = gmcp.Item.Add
-    elseif event == "gmcp.Item.Remove" then
-        message = gmcp.Item.Remove
-    elseif event == "gmcp.Item.Update" then
-        message = gmcp.Item.Update
+    for str in string.gmatch(attribute_string, "[%S]") do
+        if self.InventoryAttributes[location][str] then
+            if self.InventoryAttributes[location][str].enabled then
+                attributes[#attributes+1] = self.InventoryAttributes[location][str].name
+            end
+        end
     end
 
-    if not message then return end
+    return attributes
+end
 
-    if message.location == "room" then
-        dest = self.RoomInventoryList
+function GLPUI:ListInventory(event, ...)
+    -- Depending on which inventory we're looking at, we'll need to update
+    -- the appropriate table and widget
+
+    local location = gmcp.Char.Items.List.location
+    local table_name
+    local widget
+    if location == "room" then
+        table_name = "RoomInventoryList"
         widget = self.InventoryRoom
-    elseif message.location == "inventory" then
-        dest = self.InventoryList
+    elseif location == "inv" then
+        table_name = "InventoryList"
+        widget = self.InventoryInv
+    else
+        return
+    end
+
+    self[table_name] = table.deepcopy(gmcp.Char.Items.List.items)
+
+    self:UpdateInventoryWidget(location, widget, self[table_name])
+end
+
+function GLPUI:AddInventory(event, ...)
+    -- Add the item to the appropriate table
+    local location = gmcp.Char.Items.Add.location
+    local table_name, widget
+    if location == "room" then
+        table_name = "RoomInventoryList"
+        widget = self.InventoryRoom
+        w = self.InventoryRoom
+    elseif location == "inv" then
+        table_name = "InventoryList"
         widget = self.InventoryInv
     end
 
-    if not dest then return end
+    table.insert(self[table_name], 1, table.deepcopy(gmcp.Char.Items.Add.item))
+    self:UpdateInventoryWidget(location, widget, self[table_name])
+end
 
-    if event == "gmcp.Item.List" then
-        dest = table.deepcopy(message.items)
-    elseif event == "gmcp.Item.Add" then
-        dest[#dest+1] = message
-    elseif event == "gmcp.Item.Remove" then
-        for i, item in pairs(dest) do
-            if item.hash == message.hash then
-                table.remove(dest, i)
-                break
-            end
-        end
-    elseif event == "gmcp.Item.Update" then
-        for i, item in pairs(dest) do
-            if item.hash == message.hash then
-                dest[i] = message
-                break
-            end
+function GLPUI:RemoveInventory(event, ...)
+    local location = gmcp.Char.Items.Remove.location
+    local table_name, widget
+
+    if location == "room" then
+        table_name = "RoomInventoryList"
+        widget = self.InventoryRoom
+    elseif location == "inv" then
+        table_name = "InventoryList"
+        widget = self.InventoryInv
+    else
+        return
+    end
+
+    for i, item in pairs(self[table_name]) do
+        if item.hash == gmcp.Char.Items.Remove.item.hash then
+            table.remove(self[table_name], i)
+            break
         end
     end
 
-    self:UpdateInventoryWidget(widget, dest)
+    self:UpdateInventoryWidget(location, widget, self[table_name])
 end
 
-function GLPUI:UpdateInventoryWidget(widget, inventory)
+function GLPUI:UpdateInventory(event, ...)
+    local location, table_name, widget
+
+    location = gmcp.Char.Items.Update.location
+    if location == "room" then
+        table_name = "RoomInventoryList"
+        widget = self.InventoryRoom
+    elseif location == "inv" then
+        table_name = "InventoryList"
+        widget = self.InventoryInv
+    end
+
+    for i, item in pairs(self[table_name]) do
+        if item.hash == gmcp.Char.Items.Update.item.hash then
+            self[table_name][i] = table.deepcopy(gmcp.Char.Items.Update.item)
+            break
+        end
+    end
+
+    self:UpdateInventoryWidget(location, widget, self[table_name])
+end
+
+function GLPUI:UpdateInventoryWidget(location, widget, inventory)
     widget:clear()
-    for i, item in pairs(inventory) do
+    for _, item in pairs(inventory) do
         local line = ansi2decho(item.name)
+        local attribs = self:ConvertAttributes(location, item.attrib)
+
+        for _, attr in ipairs(attribs) do
+            line = line .. " (" .. attr .. ")"
+        end
+
         widget:decho(line .. "\n")
     end
 end
@@ -425,22 +685,22 @@ end
 
 handler = GLPUI.appName .. ":ListInventory"
 if registerNamedEventHandler(
-    GLPUI.appName, handler, "gmcp.Item.List", "GLPUI:UpdateInventory"
+    GLPUI.appName, handler, "gmcp.Char.Items.List", "GLPUI:ListInventory"
 ) then GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler end
 
 handler = GLPUI.appName .. ":AddInventory"
 if registerNamedEventHandler(
-    GLPUI.appName, handler, "gmcp.Item.Add", "GLPUI:UpdateInventory"
+    GLPUI.appName, handler, "gmcp.Char.Items.Add", "GLPUI:AddInventory"
 ) then GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler end
 
 handler = GLPUI.appName .. ":RemoveInventory"
 if registerNamedEventHandler(
-    GLPUI.appName, handler, "gmcp.Item.Remove", "GLPUI:UpdateInventory"
+    GLPUI.appName, handler, "gmcp.Char.Items.Remove", "GLPUI:RemoveInventory"
 ) then GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler end
 
 handler = GLPUI.appName .. ":UpdateInventory"
 if registerNamedEventHandler(
-    GLPUI.appName, handler, "gmcp.Item.Update", "GLPUI:UpdateInventory"
+    GLPUI.appName, handler, "gmcp.Char.Items.Update", "GLPUI:UpdateInventory"
 ) then GLPUI.EventHandlers[#GLPUI.EventHandlers+1] = handler end
 
 handler = GLPUI.appName .. ":Disconnect"

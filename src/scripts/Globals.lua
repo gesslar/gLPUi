@@ -8,6 +8,35 @@ GLPUI.metrics = {
     height = 66,
     label_font_size = 10,
     gauge_font_size = 10,
+    coin_font_size = 15,
+}
+
+GLPUI.CoinConfig = {
+    colours = {
+        platinum = { 229, 228, 226 },
+        gold = { 255, 215, 0 },
+        silver = { 192, 192, 192 },
+        copper = { 184, 115, 51 },
+    },
+    names = {
+        platinum = "Platinum",
+        gold = "Gold",
+        silver = "Silver",
+        copper = "Copper",
+    },
+    symbol = utf8.escape("%x{25CF}")
+}
+
+local PlatinumRGB = f"rgb({GLPUI.CoinConfig.colours.platinum[1]}, {GLPUI.CoinConfig.colours.platinum[2]}, {GLPUI.CoinConfig.colours.platinum[3]})"
+local GoldRGB = f"rgb({GLPUI.CoinConfig.colours.gold[1]}, {GLPUI.CoinConfig.colours.gold[2]}, {GLPUI.CoinConfig.colours.gold[3]})"
+local SilverRGB = f"rgb({GLPUI.CoinConfig.colours.silver[1]}, {GLPUI.CoinConfig.colours.silver[2]}, {GLPUI.CoinConfig.colours.silver[3]})"
+local CopperRGB = f"rgb({GLPUI.CoinConfig.colours.copper[1]}, {GLPUI.CoinConfig.colours.copper[2]}, {GLPUI.CoinConfig.colours.copper[3]})"
+
+GLPUI.Coins = {
+    platinum = 0,
+    gold = 0,
+    silver = 0,
+    copper = 0,
 }
 
 -- Styles
@@ -40,6 +69,12 @@ GLPUI.Styles = {
     XPBack    = f[[ background-color: rgba(50, 0, 50, 100%); {gauge} ]],
     CapFront  = f[[ background-color: rgba(191, 87, 0, 80%); {gauge} ]],
     CapBack   = f[[ background-color: rgba(115, 51, 0, 100%); {gauge} ]],
+    Center    = f[[ {center} ]],
+    CoinPlatinum = f[[ color:{PlatinumRGB}; ]],
+    CoinGold = f[[ color:{GoldRGB}; ]],
+    CoinSilver = f[[ color:{SilverRGB}; ]],
+    CoinCopper = f[[ color:{CopperRGB}; ]],
+    CoinLabel = f[[ {labelText} {center} ]],
 }
 
 GLPUI.Vitals = GLPUI.Vitals or {
@@ -48,4 +83,21 @@ GLPUI.Vitals = GLPUI.Vitals or {
     MP = { current = 0, max = 0 },
     Foe = { current = 0, max = 0 },
     XP = { current = 0, max = 0 }
+}
+
+GLPUI.InventoryAttributes = {
+    room = {
+        W = { name = "wearable", enabled = true },
+        c = { name = "container", enabled = true },
+        t = { name = "takeable", enabled = true },
+        m = { name = "monster", enabled = true },
+        d = { name = "dead monster", enabled = true },
+    },
+    inv = {
+        w = { name = "worn", enabled = true },
+        W = { name = "wearable", enabled = true },
+        l = { name = "wielded", enabled = true },
+        c = { name = "container", enabled = true },
+        d = { name = "dead monster", enabled = true },
+    },
 }

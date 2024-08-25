@@ -3,6 +3,8 @@ function GLPUI:Install(_, package)
       setBorderBottom(GLPUI.metrics.height)
       sendGMCP("Char.Status")
       sendGMCP("Char.Vitals")
+      sendGMCP("Char.Items.Inv")
+      sendGMCP("Char.Items.Room")
       cecho("<green>Thank you for installing gLPUi!\n")
     end
 end

@@ -2,25 +2,25 @@
        {
               "isActive": "yes",
               "isFolder": "no",
-              "name": "Globals",
+              "name": "Setup",
               "script": ""
        },
        {
               "isActive": "yes",
               "isFolder": "no",
-              "name": "System",
-              "script": ""
-       },
-       {
-              "isActive": "yes",
-              "isFolder": "no",
-              "name": "gLPUi",
-              "script": ""
-       },
-       {
-              "isActive": "yes",
-              "isFolder": "yes",
               "name": "Gmap",
+              "script": ""
+       },
+       {
+              "isActive": "yes",
+              "isFolder": "no",
+              "name": "Run",
+              "script": ""
+       },
+       {
+              "isActive": "yes",
+              "isFolder": "no",
+              "name": "Tests",
               "script": ""
        }
 ]
