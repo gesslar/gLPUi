@@ -234,7 +234,7 @@ GLPUI.CapBar.text:setFontSize(GLPUI.metrics.gauge_font_size)
 GLPUI.CapBar.text:echo(nil, "nocolor", nil)
 
 function GLPUI:UpdateXP()
-    if gmcp.Char.Status.xp == nil or gmcp.Char.Status.tnl == nil then
+    if not gmcp.Char.Status.xp or not gmcp.Char.Status.tnl then
         return
     end
 
@@ -252,6 +252,10 @@ function GLPUI:UpdateXP()
 end
 
 function GLPUI:UpdateFoe()
+    if not gmcp.Char.Status.current_enemy then
+        return
+    end
+
     local enemy = gmcp.Char.Status.current_enemy
     local enemy_health
 
@@ -266,6 +270,10 @@ function GLPUI:UpdateFoe()
 end
 
 function GLPUI:UpdateCapacity()
+    if not gmcp.Char.Status.fill or not gmcp.Char.Status.capacity then
+        return
+    end
+
     local fill = tonumber(gmcp.Char.Status.fill)
     local cap = tonumber(gmcp.Char.Status.capacity)
 
@@ -534,6 +542,10 @@ function GLPUI:UpdateCoin(type)
 end
 
 function GLPUI:UpdateCoins()
+    if not gmcp.Char.Status.wealth then
+        return
+    end
+
     local coins = gmcp.Char.Status.wealth
 
     if #table.keys(coins) == 0 then

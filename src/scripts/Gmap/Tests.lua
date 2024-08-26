@@ -1,5 +1,5 @@
 function Gmap:GetCurrentRoom()
-    return self.current_room or -1
+    return self.room_info.room_id or -1
 end
 
 function Gmap:DisplayCurrentRoom()
@@ -16,7 +16,7 @@ function Gmap:DisplayCurrentRoom()
     echo("  Name: " .. info.name .. "\n")
     echo("  Area: " .. info.area .. "\n")
     echo("  ID: " .. roomID .. "\n")
-    echo("  Hash: " .. info.roomhash .. "\n")
+    echo("  Hash: " .. info.hash .. "\n")
     echo("  Coordinates: " .. table.concat(info.coords, ", ") .. "\n")
     echo("  Environment: " .. info.environment .. "\n")
     echo("  Exits:\n")

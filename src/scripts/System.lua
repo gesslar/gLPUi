@@ -5,23 +5,28 @@ function GLPUI:Install(_, package)
       sendGMCP("Char.Vitals")
       sendGMCP("Char.Items.Inv")
       sendGMCP("Char.Items.Room")
-      cecho("<green>Thank you for installing gLPUi!\n")
+      cecho("<steel_blue>Thank you for installing gLPUi!\n")
     end
 end
 
 function GLPUI:Uninstall(_, package)
+    if not self then return end
+
     if package == self.appName then
         -- Delete all named event handlers
-        for _, v in ipairs(self.EventHandlers) do
-            if v ~= nil then
-                deleteNamedEventHandler(self.appName, v)
-            end
-        end
+        deleteAllNamedEventHandlers(self.appName)
+        self.EventHandlers = nil
+
         GLPUI.PanelWindow:hide()
+        GLPUI.PanelWindow = nil
+
         setBorderBottom(0)
+
         self.MainContainer:hide()
-        cecho("<red>You have uninstalled gLPUi.\n")
-        GLPUI = {}
+        self.MainContainer = nil
+
+        cecho("<orange_red>You have uninstalled gLPUi.\n")
+        GLPUI = nil
     end
 end
 
