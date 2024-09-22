@@ -1,0 +1,18 @@
+[
+       {
+              "isActive": "yes",
+              "isFolder": "no",
+              "name": "Zoom In",
+              "command": "",
+              "script": "",
+              "keys": "ctrl+keypad+plus"
+       },
+       {
+              "isActive": "yes",
+              "isFolder": "no",
+              "name": "Zoom Out",
+              "command": "",
+              "script": "",
+              "keys": "ctrl+keypad+minus"
+       }
+]

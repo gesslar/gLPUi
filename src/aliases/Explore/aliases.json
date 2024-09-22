@@ -1,0 +1,6 @@
+[
+    {
+        "name" : "Explore",
+        "regex" : "^explore(.*)$"
+    }
+]

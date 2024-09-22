@@ -20,7 +20,19 @@
        {
               "isActive": "yes",
               "isFolder": "yes",
-              "name": "Gmap",
+              "name": "Mapper",
+              "script": ""
+       },
+       {
+              "isActive": "yes",
+              "isFolder": "yes",
+              "name": "Highlighter",
+              "script": ""
+       },
+       {
+              "isActive": "yes",
+              "isFolder": "yes",
+              "name": "Explore",
               "script": ""
        }
 ]

@@ -11,28 +11,35 @@ end
 
 if command == "stop" then
   -- Stop the speedwalk
-  local walking = Gmap.walking
+  local walking = Mapper.walking
 
   if not walking then
     cecho("<steel_blue>You are not walking.\n")
   else
-    Gmap:ResetWalking()
+    Mapper:ResetWalking()
     cecho("<steel_blue>Speedwalk stopped.\n")
   end
 elseif command == "speed" then
   if value ~= "" then
     -- Set new speed (delay)
-    Gmap:SetSpeedwalkDelay(value)
+    Mapper:SetSpeedwalkDelay(value)
   else
     -- Check current speed (delay)
-    if Gmap.speedwalk_delay == 1 then
-      cecho("<steel_blue>Current walk speed is " .. Gmap.speedwalk_delay .. " second per step.\n")
+    if Mapper.config.speedwalk_delay == 1 then
+      cecho("<steel_blue>Current walk speed is " .. Mapper.config.speedwalk_delay .. " second per step.\n")
     else
-      cecho("<steel_blue>Current walk speed is " .. Gmap.speedwalk_delay .. " seconds per step.\n")
+      cecho("<steel_blue>Current walk speed is " .. Mapper.config.speedwalk_delay .. " seconds per step.\n")
     end
   end
 elseif command == "to" and tonumber(value) then
   local roomNumber = tonumber(value)
+  local currentRoom = Mapper.info.current.room_id
+
+  if currentRoom == roomNumber then
+    cecho("<orange_red>You are already there.\n")
+    return
+  end
+
   local result, message = gotoRoom(roomNumber)
 
   -- Walk to a specific room number

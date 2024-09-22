@@ -751,8 +751,9 @@ function GLPUI:Disconnect()
   self.RoomInventoryList = {}
   self.InventoryList = {}
 
-  self:UpdateInventoryWidget(self.InventoryRoom, self.RoomInventoryList)
-  self:UpdateInventoryWidget(self.InventoryInv, self.InventoryList)
+  self:UpdateInventoryWidget("room", self.InventoryRoom, self.RoomInventoryList)
+  self:UpdateInventoryWidget("inv", self.InventoryInv, self.InventoryList)
+
 end
 
 handler = GLPUI.appName .. ":ListInventory"
