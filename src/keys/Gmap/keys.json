@@ -1,18 +1,34 @@
 [
-       {
-              "isActive": "yes",
-              "isFolder": "no",
-              "name": "Zoom In",
-              "command": "",
-              "script": "",
-              "keys": "ctrl+keypad+plus"
-       },
-       {
-              "isActive": "yes",
-              "isFolder": "no",
-              "name": "Zoom Out",
-              "command": "",
-              "script": "",
-              "keys": "ctrl+keypad+minus"
-       }
+  {
+    "isActive": "yes",
+    "isFolder": "no",
+    "name": "Zoom In",
+    "command": "",
+    "script": "",
+    "keys": "ctrl+keypad+plus"
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
+    "name": "Zoom Out",
+    "command": "",
+    "script": "",
+    "keys": "ctrl+keypad+minus"
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
+    "name": "Centre View",
+    "command": "",
+    "script": "",
+    "keys": "ctrl+keypad+0"
+  },
+  {
+    "isActive": "yes",
+    "isFolder": "no",
+    "name": "Reset Zoom",
+    "command": "",
+    "script": "",
+    "keys": "ctrl+keypad+5"
+  }
 ]

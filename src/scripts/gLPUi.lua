@@ -366,6 +366,8 @@ GLPUI.InventoryLabel = GLPUI.InventoryLabel or Geyser.Label:new({
 
 GLPUI.InventoryContainer = GLPUI.InventoryContainer or Geyser.VBox:new({
   name = "InventoryContainer",
+  x = 0,
+  y = 0,
   width = "100%",
   height = "100%",
 }, GLPUI.InventoryLabel)
@@ -380,7 +382,11 @@ GLPUI.InventoryRoomLabel = GLPUI.InventoryRoomLabel or Geyser.Label:new({
 
 GLPUI.InventoryRoom = GLPUI.InventoryRoom or Geyser.MiniConsole:new({
   name = "InventoryRoom",
+  scrollBar = true,
+  width = "100%",
 }, GLPUI.InventoryContainer)
+GLPUI.InventoryRoom:setFont(GLPUI.Styles.MainFontName)
+GLPUI.InventoryRoom:setFontSize(GLPUI.metrics.inventory_font_size)
 
 GLPUI.InventoryInvLabel = GLPUI.InventoryInvLabel or Geyser.Label:new({
   name = "InventoryInvLabel",
@@ -392,7 +398,10 @@ GLPUI.InventoryInvLabel = GLPUI.InventoryInvLabel or Geyser.Label:new({
 
 GLPUI.InventoryInv = GLPUI.InventoryInv or Geyser.MiniConsole:new({
   name = "InventoryInv",
+  scrollBar = true,
 }, GLPUI.InventoryContainer)
+GLPUI.InventoryInv:setFont(GLPUI.Styles.MainFontName)
+GLPUI.InventoryInv:setFontSize(GLPUI.metrics.inventory_font_size)
 
 GLPUI.CoinLabel = GLPUI.CoinLabel or Geyser.Label:new({
   name = "CoinLabel",
@@ -669,7 +678,6 @@ function GLPUI:AddInventory(event, ...)
   if location == "room" then
     table_name = "RoomInventoryList"
     widget = self.InventoryRoom
-    w = self.InventoryRoom
   elseif location == "inv" then
     table_name = "InventoryList"
     widget = self.InventoryInv
@@ -729,12 +737,33 @@ function GLPUI:UpdateInventory(event, ...)
   self:UpdateInventoryWidget(location, widget, self[table_name])
 end
 
+-- Hack!
+registerNamedTimer(GLPUI.appName, GLPUI.appName .. ":UpdateInventoryWidget", 0.005, function()
+  local widgets = { GLPUI.InventoryRoom, GLPUI.InventoryInv }
+
+  for _, widget in ipairs(widgets) do
+    -- Scroll to the top
+    widget:scrollTo(0)
+    -- Scroll to the bottom
+    widget:scrollTo()
+
+    -- This is included in the hack, but we want to keep this once the
+    -- Mudlet issue is fixed. Showing/hiding the scrollbar depending
+    -- on whether the widget has more lines than rows.
+    if widget:getLineCount() > widget:getRowCount() then
+      widget:enableScrollBar()
+    else
+      widget:disableScrollBar()
+    end
+  end
+end)
+
 function GLPUI:UpdateInventoryWidget(location, widget, inventory)
   if not self then return end
 
   widget:clear()
-  for _, item in pairs(inventory) do
-    local line = ansi2decho(item.name)
+  for i, item in pairs(inventory) do
+    local line = string.format("%3d %s", i, ansi2decho(item.name))
     local attribs = self:ConvertAttributes(location, item.attrib)
 
     for _, attr in ipairs(attribs) do
@@ -743,6 +772,15 @@ function GLPUI:UpdateInventoryWidget(location, widget, inventory)
 
     widget:decho(line .. "\n")
   end
+
+  -- HACK!!!!!!
+
+  -- The below scrollTo is necessary to get the widget to display the
+  -- newly added item after it has been cleared. Without it, the widget
+  -- will not display the newly added item until it is scrolled. At
+  -- least it does not cause any flicker.
+
+  resumeNamedTimer(self.appName, self.appName .. ":UpdateInventoryWidget")
 end
 
 function GLPUI:Disconnect()
@@ -753,7 +791,6 @@ function GLPUI:Disconnect()
 
   self:UpdateInventoryWidget("room", self.InventoryRoom, self.RoomInventoryList)
   self:UpdateInventoryWidget("inv", self.InventoryInv, self.InventoryList)
-
 end
 
 handler = GLPUI.appName .. ":ListInventory"

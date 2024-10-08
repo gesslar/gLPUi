@@ -10,6 +10,7 @@ GLPUI.metrics = {
   label_font_size = 10,
   gauge_font_size = 10,
   coin_font_size = 15,
+  inventory_font_size = 8,
 }
 
 GLPUI.CoinConfig = {
@@ -43,6 +44,7 @@ GLPUI.Coins = {
 -- Styles
 local MainBackground = "background-color: rgba(18,22,25,100%);"
 local border = "border-top: 1px solid rgba(255, 255, 255, 10%); border-bottom: 1px solid rgba(255, 255, 255, 10%);"
+local panel_border = "border: 1px solid rgba(255, 255, 255, 10%);"
 local fontColor = "color: rgba(192, 192, 192, 85%);"
 local center = "qproperty-alignment: 'AlignCenter | AlignVCenter';"
 local right = "qproperty-alignment: 'AlignRight | AlignVCenter';"
@@ -55,27 +57,30 @@ local gauge = "border-radius: 5px; margin: 2.75px;"
 local gaugeText = f [[ font-family: '{gaugeFont}'; {fontColor} {center} font-weight: 600; ]]
 
 GLPUI.Styles = {
-  MainBG       = f [[ {MainBackground} {border} ]],
-  Label        = f [[ {labelText} {center} ]],
-  GaugeText    = f [[ {gaugeText} ]],
-  HPFront      = f [[ background-color: rgba(147, 58, 58, 80%); {gauge} ]],
-  HPBack       = f [[ background-color: rgba(80, 0, 0, 100%); {gauge}  ]],
-  SPFront      = f [[ background-color: rgba(58, 102, 147, 80%); {gauge} ]],
-  SPBack       = f [[ background-color: rgba(0, 34, 68, 100%); {gauge}  ]],
-  MPFront      = f [[ background-color: rgba(147, 88, 116, 80%); {gauge} ]],
-  MPBack       = f [[ background-color: rgba(77, 0, 44, 100%); {gauge}  ]],
-  FoeFront     = f [[ background-color: rgba(147, 58, 58, 80%); {gauge} ]],
-  FoeBack      = f [[ background-color: rgba(92, 0, 0, 100%); {gauge} ]],
-  XPFront      = f [[ background-color: rgba(116, 88, 147, 80%); {gauge} ]],
-  XPBack       = f [[ background-color: rgba(50, 0, 50, 100%); {gauge} ]],
-  CapFront     = f [[ background-color: rgba(191, 87, 0, 80%); {gauge} ]],
-  CapBack      = f [[ background-color: rgba(115, 51, 0, 100%); {gauge} ]],
-  Center       = f [[ {center} ]],
-  CoinPlatinum = f [[ color:{PlatinumRGB}; ]],
-  CoinGold     = f [[ color:{GoldRGB}; ]],
-  CoinSilver   = f [[ color:{SilverRGB}; ]],
-  CoinCopper   = f [[ color:{CopperRGB}; ]],
-  CoinLabel    = f [[ {labelText} {center} ]],
+  MainFontName   = f [[ {labelFont} ]],
+  WidgetFontName = f [[ {gaugeFont} ]],
+  MainBG         = f [[ {MainBackground} {border} ]],
+  Label          = f [[ {labelText} {center} ]],
+  GaugeText      = f [[ {gaugeText} ]],
+  HPFront        = f [[ background-color: rgba(147, 58, 58, 80%); {gauge} ]],
+  HPBack         = f [[ background-color: rgba(80, 0, 0, 100%); {gauge}  ]],
+  SPFront        = f [[ background-color: rgba(58, 102, 147, 80%); {gauge} ]],
+  SPBack         = f [[ background-color: rgba(0, 34, 68, 100%); {gauge}  ]],
+  MPFront        = f [[ background-color: rgba(147, 88, 116, 80%); {gauge} ]],
+  MPBack         = f [[ background-color: rgba(77, 0, 44, 100%); {gauge}  ]],
+  FoeFront       = f [[ background-color: rgba(147, 58, 58, 80%); {gauge} ]],
+  FoeBack        = f [[ background-color: rgba(92, 0, 0, 100%); {gauge} ]],
+  XPFront        = f [[ background-color: rgba(116, 88, 147, 80%); {gauge} ]],
+  XPBack         = f [[ background-color: rgba(50, 0, 50, 100%); {gauge} ]],
+  CapFront       = f [[ background-color: rgba(191, 87, 0, 80%); {gauge} ]],
+  CapBack        = f [[ background-color: rgba(115, 51, 0, 100%); {gauge} ]],
+  Center         = f [[ {center} ]],
+  CoinPlatinum   = f [[ color:{PlatinumRGB}; ]],
+  CoinGold       = f [[ color:{GoldRGB}; ]],
+  CoinSilver     = f [[ color:{SilverRGB}; ]],
+  CoinCopper     = f [[ color:{CopperRGB}; ]],
+  CoinLabel      = f [[ {labelText} {center} ]],
+  Panel          = f [[ {MainBackground} {panel_border} ]],
 }
 
 GLPUI.Vitals = GLPUI.Vitals or {
