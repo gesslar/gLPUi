@@ -1,20 +1,26 @@
 [
   {
-    "isActive": "yes",
-    "isFolder": "no",
     "name": "Globals",
+    "isActive": "yes",
+    "isFolder": "no",
     "script": ""
   },
   {
-    "isActive": "yes",
-    "isFolder": "no",
     "name": "System",
+    "isActive": "yes",
+    "isFolder": "no",
     "script": ""
   },
   {
+    "name": "MainContainer",
     "isActive": "yes",
     "isFolder": "no",
-    "name": "UI",
-    "script": ""
+    "eventHandlerList": []
+  },
+  {
+    "name": "PanelWindow",
+    "isActive": "yes",
+    "isFolder": "no",
+    "eventHandlerList": []
   }
 ]
