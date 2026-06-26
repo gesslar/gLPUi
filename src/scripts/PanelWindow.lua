@@ -447,9 +447,10 @@ function __PKGNAME__.BuildPanelWindow()
     end
 
     __PKGNAME__.update_timers[location] = tempTimer(__PKGNAME__.metrics.inventory_debounce, function()
-      __PKGNAME__.update_timers[location] = nil
-      if not __PKGNAME__ then return end
-      __PKGNAME__.UpdateInventoryWidget(location, widget, __PKGNAME__[table_name])
+      local pkg = __PKGNAME__
+      if not pkg then return end
+      pkg.update_timers[location] = nil
+      pkg.UpdateInventoryWidget(location, widget, pkg[table_name])
     end)
   end
 
