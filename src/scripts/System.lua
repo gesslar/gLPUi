@@ -1,4 +1,6 @@
-__PKGNAME__.init_gmcp = function()
+__PKGNAME__.glu = require("__PKGNAME__/vendor/Glu-single")("__PKGNAME__")
+
+__PKGNAME__.InitGmcp = function()
   tempTimer(1, function()
     sendGMCP("Char.Status")
     sendGMCP("Char.Vitals")
@@ -7,23 +9,28 @@ __PKGNAME__.init_gmcp = function()
   end)
 end
 
-local function install(_, package)
+__PKGNAME__.BuildUi = function()
+  __PKGNAME__.BuildStatusBar()
+  __PKGNAME__.BuildPanelWindow()
+end
+
+local function Install(_, package)
   if not __PKGNAME__ or package ~= __PKGNAME__.config.package_name then return end
 
-  setBorderBottom(__PKGNAME__.metrics.height)
   cecho("<steel_blue>Thank you for installing __PKGNAME__!\n")
 
-  __PKGNAME__.setupStyles()
-  __PKGNAME__.buildUi()
-  setProfileStyleSheet(__PKGNAME__.styles.Profile)
+  __PKGNAME__.SetupStyles()
+  __PKGNAME__.BuildUi()
+
+  setProfileStyleSheet(__PKGNAME__.styles.profile)
 
   local host, port, status = getConnectionInfo()
   if host and port and status then
-    __PKGNAME__.init_gmcp()
+    __PKGNAME__.InitGmcp()
   end
 end
 
-local function uninstall(_, package)
+local function Uninstall(_, package)
   if not __PKGNAME__ or package ~= __PKGNAME__.config.package_name then return end
 
   -- Delete all named event handlers
@@ -32,29 +39,26 @@ local function uninstall(_, package)
 
   __PKGNAME__.event_handlers = nil
 
-  __PKGNAME__.PanelWindow:hide()
-  __PKGNAME__.PanelWindow = nil
-
-  setBorderBottom(0)
-
-  __PKGNAME__.MainContainer:hide()
-  __PKGNAME__.MainContainer = nil
+  __PKGNAME__.TeardownStatusBar()
+  __PKGNAME__.TeardownPanelWindow()
 
   cecho("<orange_red>You have uninstalled __PKGNAME__.\n")
+
+---@diagnostic disable-next-line: assign-type-mismatch
   __PKGNAME__ = nil
 end
 
-local function load(event)
-  __PKGNAME__.setupStyles()
-  __PKGNAME__.buildUi()
+local function LoadProfile(event, newProfile)
+  __PKGNAME__.SetupStyles()
+  __PKGNAME__.BuildUi()
 end
 
-local function connection(event)
-  __PKGNAME__.init_gmcp()
+local function Connected(event)
+  __PKGNAME__.InitGmcp()
 end
 
 -- Register event handlers
-local function registerHandlers()
+local function RegisterHandlers()
   local handler
 
   handler = __PKGNAME__.config.package_name .. ":Install"
@@ -62,7 +66,7 @@ local function registerHandlers()
     __PKGNAME__.config.package_name,
     handler,
     "sysInstallPackage",
-    install,
+    Install,
     true
   ) -- We don't need to record this, as it is a oneshot.
 
@@ -71,7 +75,7 @@ local function registerHandlers()
         __PKGNAME__.config.package_name,
         handler,
         "sysUninstallPackage",
-        uninstall,
+        Uninstall,
         true
       ) then
     __PKGNAME__.event_handlers[#__PKGNAME__.event_handlers + 1] = handler
@@ -82,7 +86,7 @@ local function registerHandlers()
         __PKGNAME__.config.package_name,
         handler,
         "sysLoadEvent",
-        load,
+        LoadProfile,
         false
       ) then
     __PKGNAME__.event_handlers[#__PKGNAME__.event_handlers + 1] = handler
@@ -93,7 +97,7 @@ local function registerHandlers()
         __PKGNAME__.config.package_name,
         handler,
         "sysConnectionEvent",
-        connection,
+        Connected,
         false
       ) then
     __PKGNAME__.event_handlers[#__PKGNAME__.event_handlers + 1] = handler
@@ -127,4 +131,4 @@ function __PKGNAME__.UpdateBar(bar, value, max, text)
   bar:setValue(adjusted_value, bar_max, text)
 end
 
-registerHandlers()
+RegisterHandlers()

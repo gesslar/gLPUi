@@ -1,5 +1,7 @@
 # OxidusUI
 
+_Get some visuality with your textuality._
+
 Includes HP, SP, MP bars plus Foe bar and XP progress bar.
 
 ## License

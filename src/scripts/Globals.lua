@@ -1,5 +1,7 @@
 local script_name = "__PKGNAME__"
 
+require("__PKGNAME__/vendor/GeyserSplitter")
+
 -- Main table
 ---@class __PKGNAME__
 ---@field config table
@@ -26,6 +28,9 @@ __PKGNAME__ = __PKGNAME__ or {
     gaugeFontSize = 10,
     coin_font_size = 15,
     inventory_font_size = 8,
+    -- Seconds to wait for an inventory event burst to settle before rebuilding
+    -- the list widget once. Coalesces "drop all"/"get all" floods.
+    inventory_debounce = 0.1,
   },
   coin = {
     colours = {
@@ -82,14 +87,13 @@ __PKGNAME__ = __PKGNAME__ or {
   }
 }
 
-function __PKGNAME__.setupStyles()
+function __PKGNAME__.SetupStyles()
   -- Styles
   local MainBackground = "background-color: rgba(18,22,25,100%);"
-  -- local MainBackground = "background-color: red;"
-  local border = "border-top: 1px solid rgba(255, 255, 255, 10%); border-bottom: 1px solid rgba(255, 255, 255, 10%);"
+  local border = f [["border-top: 1px solid rgba(255, 255, 255, 10%); border-bottom: 1px solid rgba(255, 255, 255, 10%);"]]
   local panel_border = "border: 1px solid rgba(255, 255, 255, 10%);"
   local fontColor = "color: rgba(192, 192, 192, 85%);"
-  local center = "qproperty-alignment: 'AlignCenter';"
+  local center = "qproperty-alignment: 'AlignCenter | AlignVCenter';"
   local right = "qproperty-alignment: 'AlignRight | AlignVCenter';"
   local labelFont = "Ubuntu"
   local gaugeFont = "Ubuntu"
@@ -121,19 +125,16 @@ function __PKGNAME__.setupStyles()
     CapFront       = f [[ background-color: rgba(191, 87, 0, 80%); {gauge} ]],
     CapBack        = f [[ background-color: rgba(115, 51, 0, 100%); {gauge} ]],
     Center         = f [[ {center} ]],
-    CoinPlatinum   = f [[ color:{PlatinumRGB}; ]],
-    CoinGold       = f [[ color:{GoldRGB}; ]],
-    CoinSilver     = f [[ color:{SilverRGB}; ]],
-    CoinCopper     = f [[ color:{CopperRGB}; ]],
-    CoinLabel      = f [[ {labelText} {center} ]],
     Panel          = f [[ {MainBackground} {panel_border} ]],
     SplitterLabel  = f [[ {splitter} {center} ]],
+    CoinLabel      = f [[ {labelText} padding: 6px; qproperty-scaledContents: true; ]],
+    CoinNumber     = f [[ background-color: rgb(18, 22, 25); {center} margin: 2px; ]],
   }
 
   local background_color = "rgb(18, 22, 25)"
   local border_color = "rgb(82, 100, 0)"
 
-  __PKGNAME__.styles.Profile = [[
+  __PKGNAME__.styles.profile = [[
     QMainWindow {
       background: ]] .. background_color .. [[;
     }
