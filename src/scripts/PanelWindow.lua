@@ -532,6 +532,13 @@ function __PKGNAME__.BuildPanelWindow()
 end
 
 function __PKGNAME__.TeardownPanelWindow()
+  if __PKGNAME__.update_timers then
+    for location, timer in pairs(__PKGNAME__.update_timers) do
+      killTimer(timer)
+      __PKGNAME__.update_timers[location] = nil
+    end
+  end
+
   if __PKGNAME__.Splitter1 then
     __PKGNAME__.Splitter1:disconnect()
   end
